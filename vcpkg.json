@@ -1,0 +1,26 @@
+{
+    "name": "misakaprojects",
+    "version-semver": "0.1.0",
+    "dependencies": [
+        {
+            "name": "glfw3",
+            "platform": "(windows & x64) | (windows & x86)"
+        },
+        {
+            "name": "glad",
+            "platform": "(windows & x64) | (windows & x86)"
+        },
+        {
+            "name": "glm",
+            "platform": "(windows & x64) | (windows & x86)"
+        },
+        {
+            "name": "entt",
+            "platform": "(windows & x64) | (windows & x86)"
+        },
+        {
+            "name": "assimp",
+            "platform": "(windows & x64) | (windows & x86)"
+        }
+    ]
+}

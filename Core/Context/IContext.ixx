@@ -1,4 +1,4 @@
-export module Misaka.Core.Context.IContext;
+﻿export module Misaka.Core.Context.IContext;
 
 namespace Misaka::Core::Context {
 

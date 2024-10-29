@@ -74,6 +74,7 @@ project "Core"
         "glad",
         "glfw3",
         "glm",
+        "imguid",
         "kubazip",
         "minizip",
         "poly2tri",

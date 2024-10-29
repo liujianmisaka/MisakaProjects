@@ -21,6 +21,15 @@
         {
             "name": "assimp",
             "platform": "(windows & x64) | (windows & x86)"
+        },
+        {
+            "name": "imgui",
+            "platform": "(windows & x64) | (windows & x86)",
+            "features": [
+                "docking-experimental",
+                "glfw-binding",
+                "opengl3-binding"
+            ]
         }
     ]
 }

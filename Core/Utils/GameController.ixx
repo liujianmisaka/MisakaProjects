@@ -1,7 +1,8 @@
 export module Misaka.Core.Utils.GameController;
 
+import <GLFW/glfw3.h>;
 import Misaka.Core.Context.Context;
-import Misaka.Core.GameModule.OpenGLInitSystem;
+import Misaka.Core.GameModule.RenderInitSystem;
 import Misaka.Core.GameModule.OpenGLRenderSystem;
 import Misaka.Core.GameModule.OpenGLAssetUpLoadSystem;
 import Misaka.Core.GameRoom.GameRoom;
@@ -9,6 +10,7 @@ import Misaka.Core.Entity.MisakaEntity;
 import Misaka.Core.Component.MeshComponent;
 import Misaka.Core.Component.RenderComponent;
 import Misaka.Core.Resource.AssetLoader;
+import Misaka.Core.UI.MainWindow;
 
 namespace Misaka::Core::Utils {
 
@@ -25,34 +27,35 @@ public:
 
 protected:
     void Init() {
-        // 初始化游戏
         Context::Context::Instance().Initialize();
-        GameModules::OpenGLInitSystem initSystem;
+
+        GameModules::RenderInitSystem initSystem;
         initSystem.Init();
 
-        GameRoom::GameRoom mainRoom;
-        auto               entity        = mainRoom.AddEntity();
-        auto&              meshComponent = entity.AddComponent<Component::MeshComponent>();
+        m_MainWindow = UI::MainWindow();
+        m_MainWindow.Initialize();
+
+        m_MainRoom.Init();
+
+        auto  entity        = m_MainRoom.AddEntity();
+        auto& meshComponent = entity.AddComponent<Component::MeshComponent>();
         entity.AddComponent<Component::RenderComponent>();
         Resource::AssetLoader().LoadMeshes("../Assets/Objects/cube.obj", meshComponent);
-
-        auto view = Context::Context::Instance().gameRoomContext.Registry->view<Component::MeshComponent>();
     }
     void Loop() {
-        // 游戏主循环
         while (!Context::Context::Instance().graphicsContext.shouldClose()) {
-            m_AssetUpLoadSystem.Excute();
-            m_RenderSystem.Render();
+            glfwPollEvents();
+            m_MainWindow.Draw();
+            // m_MainRoom.Excute();
+            // m_MainRoom.Render();
+            glfwSwapBuffers(Context::Context::Instance().graphicsContext.Window);
         }
     }
-    void Exit() {
-        // 退出游戏
-    }
+    void Exit() {}
 
 private:
-    Context::Context*                    m_Context;
-    GameModules::OpenGLAssetUpLoadSystem m_AssetUpLoadSystem;
-    GameModules::OpenGLRenderSystem      m_RenderSystem;
+    GameRoom::GameRoom m_MainRoom;
+    UI::MainWindow     m_MainWindow;
 };
 
 } // namespace Misaka::Core::Utils

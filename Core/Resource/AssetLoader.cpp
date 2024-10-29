@@ -14,17 +14,14 @@ import Misaka.Core.Component.MeshComponent;
 
 namespace Misaka::Core::Resource {
 
-// 函数声明
 static void                        ProcessNode(aiNode* node, const aiScene* scene, std::vector<std::shared_ptr<Data::Mesh>>& meshes);
 static std::shared_ptr<Data::Mesh> ProcessMesh(aiMesh* assimpMesh, const aiScene* scene);
 
 void AssetLoader::LoadMeshes(const std::string& meshPath, Component::MeshComponent& meshComponent) {
-    // 使用 Assimp 读取模型文件
     Assimp::Importer importer;
     const aiScene*   scene =
         importer.ReadFile(meshPath, aiProcess_Triangulate | aiProcess_FlipUVs | aiProcess_GenNormals | aiProcess_JoinIdenticalVertices);
 
-    // 检查文件是否成功导入
     if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) {
         std::cerr << "ERROR::ASSIMP:: " << importer.GetErrorString() << std::endl;
         return;
@@ -37,22 +34,19 @@ void AssetLoader::LoadMeshes(const std::string& meshPath, Component::MeshCompone
     meshComponent.vertices = meshes[0]->vertices;
 }
 
-// 遍历aiNode并加载网格
 static void ProcessNode(aiNode* node, const aiScene* scene, std::vector<std::shared_ptr<Data::Mesh>>& meshes) {
-    // 遍历当前节点的每个网格
+
     for (unsigned int i = 0; i < node->mNumMeshes; ++i) {
         aiMesh* assimpMesh = scene->mMeshes[node->mMeshes[i]];
         auto    mesh       = ProcessMesh(assimpMesh, scene);
         meshes.push_back(mesh);
     }
 
-    // 递归处理子节点
     for (unsigned int i = 0; i < node->mNumChildren; ++i) {
         ProcessNode(node->mChildren[i], scene, meshes);
     }
 }
 
-// 处理网格的具体函数
 static std::shared_ptr<Data::Mesh> ProcessMesh(aiMesh* assimpMesh, const aiScene* scene) {
     auto mesh = std::make_shared<Data::Mesh>();
 
@@ -60,7 +54,6 @@ static std::shared_ptr<Data::Mesh> ProcessMesh(aiMesh* assimpMesh, const aiScene
     glm::mat4 modelMatrix2 = glm::rotate(glm::mat4(1.0f), glm::radians(45.0f), glm::vec3(0.0f, 0.0f, 1.0f));
     glm::mat4 modelMatrix3 = glm::rotate(glm::mat4(1.0f), glm::radians(45.0f), glm::vec3(1.0f, 0.0f, 0.0f));
 
-    // 提取顶点数据
     for (unsigned int i = 0; i < assimpMesh->mNumVertices; ++i) {
         // position
         glm::vec4 transformedPosition = modelMatrix3 * modelMatrix2 * modelMatrix *
@@ -86,7 +79,6 @@ static std::shared_ptr<Data::Mesh> ProcessMesh(aiMesh* assimpMesh, const aiScene
         }
     }
 
-    // 提取索引数据
     for (unsigned int i = 0; i < assimpMesh->mNumFaces; ++i) {
         aiFace face = assimpMesh->mFaces[i];
         for (unsigned int j = 0; j < face.mNumIndices; ++j) {

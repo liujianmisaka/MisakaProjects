@@ -1,6 +1,5 @@
 export module Misaka.Core.Component.RenderComponent;
 
-// import "Utils/MisakaStd.h";
 import <cstdint>;
 import Misaka.Core.Component.IComponent;
 

@@ -3,7 +3,7 @@ module;
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
-module Misaka.Core.GameModule.OpenGLInitSystem;
+module Misaka.Core.GameModule.RenderInitSystem;
 
 import <vector>;
 import <fstream>;
@@ -29,7 +29,6 @@ static unsigned int compileShader(unsigned int type, const char *source) {
     return shader;
 }
 
-// 创建着色器程序
 static unsigned int createShaderProgram(const char *vertexShaderSource, const char *fragmentShaderSource) {
     unsigned int vertexShader   = compileShader(GL_VERTEX_SHADER, vertexShaderSource);
     unsigned int fragmentShader = compileShader(GL_FRAGMENT_SHADER, fragmentShaderSource);
@@ -47,7 +46,6 @@ static unsigned int createShaderProgram(const char *vertexShaderSource, const ch
         std::cout << "ERROR::PROGRAM::LINKING_FAILED\n" << infoLog << std::endl;
     }
 
-    // 删除着色器对象
     glDeleteShader(vertexShader);
     glDeleteShader(fragmentShader);
 
@@ -78,18 +76,15 @@ static unsigned int createShaderProgram(const std::string &vertexPath, const std
     return createShaderProgram(vertexShaderSource, fragmentShaderSource);
 }
 
-void OpenGLInitSystem::Init() {
-    // 初始化 GLFW
+void RenderInitSystem::Init() {
     if (!glfwInit()) {
         std::cerr << "Failed to initialize GLFW" << std::endl;
     }
 
-    // 配置 OpenGL 版本
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-    // 创建窗口
     GLFWwindow *window = glfwCreateWindow(800, 600, "OpenGL Triangle", nullptr, nullptr);
     if (!window) {
         std::cerr << "Failed to create GLFW window" << std::endl;
@@ -98,7 +93,6 @@ void OpenGLInitSystem::Init() {
 
     glfwMakeContextCurrent(window);
 
-    // 加载 GLAD
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
         std::cerr << "Failed to initialize GLAD" << std::endl;
     }
@@ -107,7 +101,7 @@ void OpenGLInitSystem::Init() {
 
     Context::Context::Instance().graphicsContext.Window = window;
 
-    // TODO: 放到其它地方
+    // TODO: 
     unsigned int      shaderProgram = -1;
     const std::string PROJECT_PATH  = "D:/dev/MisakaProjects/";
 

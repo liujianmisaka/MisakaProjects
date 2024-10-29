@@ -1,6 +1,5 @@
 export module Misaka.Core.Component.MeshComponent;
 
-//import "Utils/MisakaStd.h";
 import <vector>;
 import Misaka.Core.Component.IComponent;
 

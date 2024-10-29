@@ -40,7 +40,9 @@ project "Core"
     enablemodules("on")
     buildstlmodules("on")
     scanformoduledependencies "true"
-    
+
+    buildoptions { "/utf-8" }  -- 使用 UTF-8 编码
+
     targetdir ("bin/" .. outputdir .. "/%{prj.name}")
     objdir ("bin-int/" .. outputdir .. "/%{prj.name}")
     
@@ -113,6 +115,8 @@ project "Sandbox"
     enablemodules("on")
     buildstlmodules("on")
     scanformoduledependencies "true"
+
+    buildoptions { "/utf-8" }  -- 使用 UTF-8 编码
     
     targetdir ("bin/" .. outputdir .. "/%{prj.name}")
     objdir ("bin-int/" .. outputdir .. "/%{prj.name}")

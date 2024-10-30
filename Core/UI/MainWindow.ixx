@@ -23,14 +23,13 @@ public:
         ImGui_ImplOpenGL3_Init("#version 130");
     }
 
-    void Draw() {
-        bool          show_demo_window    = true;
-        bool          show_another_window = false;
-        static ImVec4 clear_color         = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
-
+    void BeginFrame() {
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
+    }
+
+    void Draw() {
         ImGui::ShowDemoWindow(&show_demo_window);
 
         // 2. Show a simple window that we create ourselves. We use a Begin/End pair to created a named window.
@@ -64,10 +63,23 @@ public:
             if (ImGui::Button("Close Me")) show_another_window = false;
             ImGui::End();
         }
+    }
 
+    void EndFrame() {
         ImGui::Render();
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
     }
+
+    void Shutdown() {
+        ImGui_ImplOpenGL3_Shutdown();
+        ImGui_ImplGlfw_Shutdown();
+        ImGui::DestroyContext();
+    }
+
+private:
+    bool   show_demo_window    = true;
+    bool   show_another_window = false;
+    ImVec4 clear_color         = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
 };
 
 } // namespace Misaka::Core::UI

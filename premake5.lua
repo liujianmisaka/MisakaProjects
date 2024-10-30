@@ -72,16 +72,24 @@ project "Core"
     links
     {
         "assimp-vc143-mtd",
+        "bgfx",
+        "bimg",
+        "bimg_decode",
+        "bimg_encode",
+        "bx",
         "draco",
         "glad",
         "glfw3",
         "glm",
         "imguid",
         "kubazip",
+        "miniz",
         "minizip",
         "poly2tri",
         "polyclipping",
         "pugixml",
+        "squishd",
+        "tinyexr",
         "zlibd",
     }
 
@@ -157,5 +165,84 @@ project "Sandbox"
 
     filter "configurations:Release"
         defines "SANDBOX_RELEASE"
+        runtime "Release"
+        optimize "on"
+
+-- Test Project
+project "Test"
+    location "Test"
+    kind "ConsoleApp"
+    language "C++"
+    cppdialect "C++latest"
+    staticruntime "on"
+    enablemodules("on")
+    buildstlmodules("on")
+    scanformoduledependencies "true"
+
+    buildoptions { "/utf-8" }  -- 使用 UTF-8 编码
+    
+    targetdir ("bin/" .. outputdir .. "/%{prj.name}")
+    objdir ("bin-int/" .. outputdir .. "/%{prj.name}")
+
+    files
+    {
+        "%{prj.location}/**.hpp",
+        "%{prj.location}/**.h",
+        "%{prj.location}/**.cpp",
+        "%{prj.location}/**.ixx"
+    }
+    
+    includedirs
+    {
+        VCPKG_INCLUDE  -- Include vcpkg dependencies
+    }
+
+    libdirs 
+    {
+        -- Add the vcpkg library path
+        VCPKG_DEBUG_LIB
+    }
+
+    links
+    {
+        "assimp-vc143-mtd",
+        "bgfx",
+        "bimg",
+        "bimg_decode",
+        "bimg_encode",
+        "bx",
+        "draco",
+        "glad",
+        "glfw3",
+        "glm",
+        "imguid",
+        "kubazip",
+        "miniz",
+        "minizip",
+        "poly2tri",
+        "polyclipping",
+        "pugixml",
+        "squishd",
+        "tinyexr",
+        "zlibd",
+    }
+
+    -- 添加 /NODEFAULTLIB:library 选项来避免默认库的链接冲突
+    buildoptions { "/NODEFAULTLIB:MSVCRT" }  -- 如果是其他库的冲突，请替换 'MSVCRT' 为相应的库名
+
+    filter "system:windows"
+        systemversion "latest"
+        defines 
+        { 
+            "Test_PLATFORM_WINDOWS"
+        }
+
+    filter "configurations:Debug"
+        defines "Test_DEBUG"
+        runtime "Debug"
+        symbols "on"
+
+    filter "configurations:Release"
+        defines "Test_RELEASE"
         runtime "Release"
         optimize "on"

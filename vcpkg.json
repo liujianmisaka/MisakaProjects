@@ -30,6 +30,10 @@
                 "glfw-binding",
                 "opengl3-binding"
             ]
+        },
+        {
+            "name": "bgfx",
+            "platform": "(windows & x64) | (windows & x86)"
         }
     ]
 }

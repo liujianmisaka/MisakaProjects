@@ -1,6 +1,7 @@
 export module Misaka.Core.Utils.GameController;
 
 import <GLFW/glfw3.h>;
+import <glad/glad.h>;
 import Misaka.Core.Context.Context;
 import Misaka.Core.GameModule.RenderInitSystem;
 import Misaka.Core.GameModule.OpenGLRenderSystem;
@@ -45,7 +46,11 @@ protected:
     void Loop() {
         while (!Context::Context::Instance().graphicsContext.shouldClose()) {
             glfwPollEvents();
+            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+            glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+            m_MainWindow.BeginFrame();
             m_MainWindow.Draw();
+            m_MainWindow.EndFrame();
             // m_MainRoom.Excute();
             // m_MainRoom.Render();
             glfwSwapBuffers(Context::Context::Instance().graphicsContext.Window);

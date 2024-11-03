@@ -41,7 +41,9 @@ project "Core"
     buildstlmodules("on")
     scanformoduledependencies "true"
 
-    buildoptions { "/utf-8" }  -- 使用 UTF-8 编码
+    buildoptions { "/utf-8", "/Zc:__cplusplus", "/Zc:preprocessor" }  -- 使用 UTF-8 编码
+    -- 添加 /NODEFAULTLIB:library 选项来避免默认库的链接冲突
+    buildoptions { "/NODEFAULTLIB:MSVCRT" }  -- 如果是其他库的冲突，请替换 'MSVCRT' 为相应的库名
 
     targetdir ("bin/" .. outputdir .. "/%{prj.name}")
     objdir ("bin-int/" .. outputdir .. "/%{prj.name}")
@@ -92,15 +94,13 @@ project "Core"
         "tinyexr",
         "zlibd",
     }
-
-    -- 添加 /NODEFAULTLIB:library 选项来避免默认库的链接冲突
-    buildoptions { "/NODEFAULTLIB:MSVCRT" }  -- 如果是其他库的冲突，请替换 'MSVCRT' 为相应的库名
     
     filter "system:windows"
         systemversion "latest"
         defines 
         { 
-            "CORE_PLATFORM_WINDOWS"
+            "CORE_PLATFORM_WINDOWS",
+            "BX_CONFIG_DEBUG"
         }
 
     filter "configurations:Debug"
@@ -124,7 +124,7 @@ project "Sandbox"
     buildstlmodules("on")
     scanformoduledependencies "true"
 
-    buildoptions { "/utf-8" }  -- 使用 UTF-8 编码
+    buildoptions { "/utf-8", "/Zc:__cplusplus" }  -- 使用 UTF-8 编码
     
     targetdir ("bin/" .. outputdir .. "/%{prj.name}")
     objdir ("bin-int/" .. outputdir .. "/%{prj.name}")
@@ -179,7 +179,7 @@ project "Test"
     buildstlmodules("on")
     scanformoduledependencies "true"
 
-    buildoptions { "/utf-8" }  -- 使用 UTF-8 编码
+    buildoptions { "/utf-8", "/Zc:__cplusplus" }  -- 使用 UTF-8 编码
     
     targetdir ("bin/" .. outputdir .. "/%{prj.name}")
     objdir ("bin-int/" .. outputdir .. "/%{prj.name}")

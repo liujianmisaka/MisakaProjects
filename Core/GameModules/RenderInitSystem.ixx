@@ -7,7 +7,7 @@ namespace Misaka::Core::GameModules {
 export class RenderInitSystem : public IInitSystem {
 public:
     virtual ~RenderInitSystem() = default;
-    virtual void Init() override;
+    virtual void Initialize() override;
 };
 
 } // namespace Misaka::Core::GameModules

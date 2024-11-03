@@ -2,6 +2,10 @@ module;
 
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
+#include <bgfx/bgfx.h>
+#include <bgfx/platform.h>
+#define GLFW_EXPOSE_NATIVE_WIN32
+#include <GLFW/glfw3native.h>
 
 module Misaka.Core.GameModule.RenderInitSystem;
 
@@ -9,104 +13,50 @@ import <vector>;
 import <fstream>;
 import <sstream>;
 import <iostream>;
-import Misaka.Core.Context.Context;
+import Misaka.Core.Component.GLFWWindowComponent;
+import Misaka.Core.GameModule.Interface.IInitSystem;
 
 namespace Misaka::Core::GameModules {
 
-static unsigned int compileShader(unsigned int type, const char *source) {
-    unsigned int shader = glCreateShader(type);
-    glShaderSource(shader, 1, &source, nullptr);
-    glCompileShader(shader);
-
-    int  success;
-    char infoLog[512];
-    glGetShaderiv(shader, GL_COMPILE_STATUS, &success);
-    if (!success) {
-        glGetShaderInfoLog(shader, 512, nullptr, infoLog);
-        std::cout << "ERROR::SHADER::COMPILATION_FAILED\n" << infoLog << std::endl;
-    }
-
-    return shader;
+static void FramebufferSizeCallback(GLFWwindow *window, int width, int height) {
+    bgfx::reset(width, height, BGFX_RESET_VSYNC);
+    Component::GLFWWindowComponent::Instance().width  = width;
+    Component::GLFWWindowComponent::Instance().height = height;
 }
 
-static unsigned int createShaderProgram(const char *vertexShaderSource, const char *fragmentShaderSource) {
-    unsigned int vertexShader   = compileShader(GL_VERTEX_SHADER, vertexShaderSource);
-    unsigned int fragmentShader = compileShader(GL_FRAGMENT_SHADER, fragmentShaderSource);
-
-    unsigned int shaderProgram = glCreateProgram();
-    glAttachShader(shaderProgram, vertexShader);
-    glAttachShader(shaderProgram, fragmentShader);
-    glLinkProgram(shaderProgram);
-
-    int  success;
-    char infoLog[512];
-    glGetProgramiv(shaderProgram, GL_LINK_STATUS, &success);
-    if (!success) {
-        glGetProgramInfoLog(shaderProgram, 512, nullptr, infoLog);
-        std::cout << "ERROR::PROGRAM::LINKING_FAILED\n" << infoLog << std::endl;
-    }
-
-    glDeleteShader(vertexShader);
-    glDeleteShader(fragmentShader);
-
-    return shaderProgram;
-}
-
-static const char *readFile(const std::string &filePath) {
-    std::ifstream file(filePath);
-    if (!file.is_open()) {
-        std::cout << "ERROR::SHADER::FILE_NOT_FOUND\n";
-        return nullptr;
-    }
-
-    std::stringstream buffer;
-    buffer << file.rdbuf();
-    file.close();
-
-    std::string fileContent = buffer.str();
-    char       *source      = new char[fileContent.size() + 1];
-    std::strcpy(source, fileContent.c_str());
-
-    return source;
-}
-
-static unsigned int createShaderProgram(const std::string &vertexPath, const std::string &fragmentPath) {
-    const char *vertexShaderSource   = readFile(vertexPath);
-    const char *fragmentShaderSource = readFile(fragmentPath);
-    return createShaderProgram(vertexShaderSource, fragmentShaderSource);
-}
-
-void RenderInitSystem::Init() {
+void RenderInitSystem::Initialize() {
     if (!glfwInit()) {
         std::cerr << "Failed to initialize GLFW" << std::endl;
     }
 
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-
-    GLFWwindow *window = glfwCreateWindow(800, 600, "OpenGL Triangle", nullptr, nullptr);
+    auto       &glfwWindowComponent = Component::GLFWWindowComponent::Instance();
+    GLFWwindow *window =
+        glfwCreateWindow(glfwWindowComponent.width, glfwWindowComponent.height, glfwWindowComponent.title, nullptr, nullptr);
     if (!window) {
         std::cerr << "Failed to create GLFW window" << std::endl;
         glfwTerminate();
     }
+    glfwWindowComponent.window = window;
 
     glfwMakeContextCurrent(window);
+    glfwSetFramebufferSizeCallback(window, &FramebufferSizeCallback);
 
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
         std::cerr << "Failed to initialize GLAD" << std::endl;
     }
 
-    glEnable(GL_DEPTH_TEST);
+    bgfx::Init init;
+    init.type              = bgfx::RendererType::OpenGL;
+    init.vendorId          = BGFX_PCI_ID_NVIDIA;
+    init.platformData.nwh  = glfwGetWin32Window(glfwWindowComponent.window);
+    init.platformData.ndt  = nullptr;
+    init.resolution.width  = glfwWindowComponent.width;
+    init.resolution.height = glfwWindowComponent.height;
+    init.resolution.reset  = BGFX_RESET_VSYNC;
+    bgfx::init(init);
 
-    Context::Context::Instance().graphicsContext.Window = window;
-
-    // TODO: 
-    unsigned int      shaderProgram = -1;
-    const std::string PROJECT_PATH  = "D:/dev/MisakaProjects/";
-
-    shaderProgram = createShaderProgram(PROJECT_PATH + "Assets/Shaders/base.vert", PROJECT_PATH + "Assets/Shaders/base.frag");
-    Context::Context::Instance().graphicsContext.CommonShaders[Context::ShaderType::Base] = shaderProgram;
+    bgfx::setViewClear(0, BGFX_CLEAR_COLOR | BGFX_CLEAR_DEPTH, 0x6495EDFF, 1.0f, 0);
+    bgfx::setViewRect(0, 0, 0, glfwWindowComponent.width, glfwWindowComponent.height);
 }
 
 } // namespace Misaka::Core::GameModules

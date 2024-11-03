@@ -6,10 +6,12 @@ import Misaka.Core.Context.Context;
 import Misaka.Core.GameModule.RenderInitSystem;
 import Misaka.Core.GameModule.OpenGLRenderSystem;
 import Misaka.Core.GameModule.OpenGLAssetUpLoadSystem;
+import Misaka.Core.GameModules.ImGuiInitSystem;
 import Misaka.Core.GameRoom.GameRoom;
 import Misaka.Core.Entity.MisakaEntity;
 import Misaka.Core.Component.MeshComponent;
 import Misaka.Core.Component.RenderComponent;
+import Misaka.Core.Component.GLFWWindowComponent;
 import Misaka.Core.Resource.AssetLoader;
 import Misaka.Core.UI.MainWindow;
 
@@ -31,10 +33,12 @@ protected:
         Context::Context::Instance().Initialize();
 
         GameModules::RenderInitSystem initSystem;
-        initSystem.Init();
+        initSystem.Initialize();
+
+        GameModules::ImGuiInitSystem imguiInitSystem;
+        imguiInitSystem.Initialize();
 
         m_MainWindow = UI::MainWindow();
-        m_MainWindow.Initialize();
 
         m_MainRoom.Init();
 
@@ -43,19 +47,18 @@ protected:
         entity.AddComponent<Component::RenderComponent>();
         Resource::AssetLoader().LoadMeshes("../Assets/Objects/cube.obj", meshComponent);
     }
+
     void Loop() {
-        while (!Context::Context::Instance().graphicsContext.shouldClose()) {
+        while (!glfwWindowShouldClose(Component::GLFWWindowComponent::Instance().window)) {
             glfwPollEvents();
-            glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-            glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
             m_MainWindow.BeginFrame();
             m_MainWindow.Draw();
             m_MainWindow.EndFrame();
             // m_MainRoom.Excute();
             // m_MainRoom.Render();
-            glfwSwapBuffers(Context::Context::Instance().graphicsContext.Window);
         }
     }
+
     void Exit() {}
 
 private:

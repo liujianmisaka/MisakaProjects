@@ -7,7 +7,7 @@ namespace Misaka::Core::GameModules {
 export class IInitSystem {
 public:
     virtual ~IInitSystem() = default;
-    virtual void Init() = 0;
+    virtual void Initialize() = 0;
 };
 
 } // namespace Misaka::Core::GameModules

@@ -13,7 +13,7 @@ module;
 export module Misaka.Core.GameModules.ImGuiInitSystem;
 
 import <iostream>;
-import Misaka.Core.Component.GLFWWindowComponent;
+import Misaka.Core.Component.WindowDataComponent;
 import Misaka.Core.GameModule.Interface.IInitSystem;
 
 namespace Misaka::Core::GameModules {
@@ -23,7 +23,7 @@ public:
     virtual ~ImGuiInitSystem() = default;
 
     virtual void Initialize() override {
-        auto& glfwWindowComponent = Component::GLFWWindowComponent::Instance();
+        auto& glfwWindowComponent = Component::WindowDataComponent::Instance();
 
         if (glfwWindowComponent.window == nullptr) {
             throw std::runtime_error("GLFW window is nullptr, call RenderInitSystem first.");

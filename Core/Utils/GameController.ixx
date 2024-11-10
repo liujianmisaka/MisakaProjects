@@ -11,7 +11,7 @@ import Misaka.Core.GameRoom.GameRoom;
 import Misaka.Core.Entity.MisakaEntity;
 import Misaka.Core.Component.MeshComponent;
 import Misaka.Core.Component.RenderComponent;
-import Misaka.Core.Component.GLFWWindowComponent;
+import Misaka.Core.Component.WindowDataComponent;
 import Misaka.Core.Resource.AssetLoader;
 import Misaka.Core.UI.MainWindow;
 
@@ -49,7 +49,7 @@ protected:
     }
 
     void Loop() {
-        while (!glfwWindowShouldClose(Component::GLFWWindowComponent::Instance().window)) {
+        while (!glfwWindowShouldClose(Component::WindowDataComponent::Instance().window)) {
             glfwPollEvents();
             m_MainWindow.BeginFrame();
             m_MainWindow.Draw();

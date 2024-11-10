@@ -13,15 +13,15 @@ import <vector>;
 import <fstream>;
 import <sstream>;
 import <iostream>;
-import Misaka.Core.Component.GLFWWindowComponent;
+import Misaka.Core.Component.WindowDataComponent;
 import Misaka.Core.GameModule.Interface.IInitSystem;
 
 namespace Misaka::Core::GameModules {
 
 static void FramebufferSizeCallback(GLFWwindow *window, int width, int height) {
     bgfx::reset(width, height, BGFX_RESET_VSYNC);
-    Component::GLFWWindowComponent::Instance().width  = width;
-    Component::GLFWWindowComponent::Instance().height = height;
+    Component::WindowDataComponent::Instance().width  = width;
+    Component::WindowDataComponent::Instance().height = height;
 }
 
 void RenderInitSystem::Initialize() {
@@ -29,7 +29,7 @@ void RenderInitSystem::Initialize() {
         std::cerr << "Failed to initialize GLFW" << std::endl;
     }
 
-    auto       &glfwWindowComponent = Component::GLFWWindowComponent::Instance();
+    auto       &glfwWindowComponent = Component::WindowDataComponent::Instance();
     GLFWwindow *window =
         glfwCreateWindow(glfwWindowComponent.width, glfwWindowComponent.height, glfwWindowComponent.title, nullptr, nullptr);
     if (!window) {

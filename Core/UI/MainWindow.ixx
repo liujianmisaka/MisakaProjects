@@ -14,7 +14,7 @@ export module Misaka.Core.UI.MainWindow;
 
 import <iostream>;
 import Misaka.Core.Context.Context;
-import Misaka.Core.Component.GLFWWindowComponent;
+import Misaka.Core.Component.WindowDataComponent;
 
 namespace Misaka::Core::UI {
 
@@ -186,7 +186,7 @@ public:
     void EndFrame() {
         ImGui::Render();
         ImGui_Implbgfx_RenderDrawLists(ImGui::GetDrawData());
-        bgfx::setViewRect(0, 0, 0, Component::GLFWWindowComponent::Instance().width, Component::GLFWWindowComponent::Instance().height);
+        bgfx::setViewRect(0, 0, 0, Component::WindowDataComponent::Instance().width, Component::WindowDataComponent::Instance().height);
         bgfx::frame();
     }
 

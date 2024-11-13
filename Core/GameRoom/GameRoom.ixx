@@ -8,16 +8,16 @@ import Misaka.Core.Entity.MisakaEntity;
 import Misaka.Core.GameModule.Interface.ISystem;
 import Misaka.Core.GameModule.Interface.IExcuteSystem;
 import Misaka.Core.GameModule.Interface.IRenderSystem;
-import Misaka.Core.GameModule.OpenGLAssetUpLoadSystem;
-import Misaka.Core.GameModule.OpenGLRenderSystem;
+import Misaka.Core.GameModule.AssetUpLoadSystem;
+import Misaka.Core.GameModule.RenderSystem;
 
 namespace Misaka::Core::GameRoom {
 
 export class GameRoom {
 public:
     void Init() {
-        m_ExcuteSystem.emplace_back(std::make_shared<GameModules::OpenGLAssetUpLoadSystem>());
-        m_RenderSystem.emplace_back(std::make_shared<GameModules::OpenGLRenderSystem>());
+        m_ExcuteSystem.emplace_back(std::make_shared<GameModules::AssetUpLoadSystem>());
+        m_RenderSystem.emplace_back(std::make_shared<GameModules::RenderSystem>());
     }
 
     Entity::MisakaEntity AddEntity() {

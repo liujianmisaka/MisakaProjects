@@ -1,42 +1,29 @@
 export module Misaka.Core.Component.RenderComponent;
 
 import <cstdint>;
+import <vector>;
+import <string>;
+import <memory>;
 import Misaka.Core.Component.IComponent;
+import Misaka.Core.Renderer.VertexBuffer;
+import Misaka.Core.Renderer.IndexBuffer;
+import Misaka.Core.Renderer.Shader;
+
+namespace Misaka::Core::Resource::Data {
+
+struct RenderData {
+    Renderer::VertexBuffer vertexBuffer;
+    Renderer::IndexBuffer  indexBuffer;
+    Renderer::Shader       shader;
+};
+
+} // namespace Misaka::Core::Resource::Data
 
 namespace Misaka::Core::Component {
 
 export class RenderComponent : public IComponent {
 public:
-    RenderComponent() {
-        textureID       = -1;
-        shaderProgramID = -1;
-        vertexArrayID   = -1;
-        vertexBufferID  = -1;
-        indexBufferID   = -1;
-        indexCount      = -1;
-    }
-    RenderComponent(RenderComponent& other) {
-        textureID       = other.textureID;
-        shaderProgramID = other.shaderProgramID;
-        vertexArrayID   = other.vertexArrayID;
-        vertexBufferID  = other.vertexBufferID;
-        indexBufferID   = other.indexBufferID;
-        indexCount      = other.indexCount;
-
-        other.textureID       = 0;
-        other.shaderProgramID = 0;
-        other.vertexArrayID   = 0;
-        other.vertexBufferID  = 0;
-        other.indexBufferID   = 0;
-        other.indexCount      = 0;
-    }
-
-    std::uint32_t textureID;
-    std::uint32_t shaderProgramID;
-    std::uint32_t vertexArrayID;
-    std::uint32_t vertexBufferID;
-    std::uint32_t indexBufferID;
-    std::uint32_t indexCount;
+    std::vector<std::shared_ptr<Resource::Data::RenderData>> renderDatas;
 };
 
 } // namespace Misaka::Core::Component

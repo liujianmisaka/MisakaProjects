@@ -4,8 +4,6 @@ module;
 
 export module Misaka.Core.Renderer.VertexLayout;
 
-import <memory>;
-
 namespace Misaka::Core::Renderer {
 
 export class VertexLayout {
@@ -31,14 +29,12 @@ public:
         m_VertexLayout.add(bgfx::Attrib::Color0, 3, bgfx ::AttribType::Float);
     }
 
-    static std::shared_ptr<VertexLayout> Create();
+    static VertexLayout Create() {
+        return VertexLayout();
+    }
 
 private:
     bgfx::VertexLayout m_VertexLayout;
 };
-
-std::shared_ptr<VertexLayout> VertexLayout::Create() {
-    return std::make_shared<VertexLayout>();
-}
 
 } // namespace Misaka::Core::Renderer

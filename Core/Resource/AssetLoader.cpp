@@ -30,8 +30,7 @@ void AssetLoader::LoadMeshes(const std::string& meshPath, Component::MeshCompone
     std::vector<std::shared_ptr<Data::Mesh>> meshes;
     ProcessNode(scene->mRootNode, scene, meshes);
 
-    meshComponent.indices  = meshes[0]->indices;
-    meshComponent.vertices = meshes[0]->vertices;
+    meshComponent.meshes = meshes;
 }
 
 static void ProcessNode(aiNode* node, const aiScene* scene, std::vector<std::shared_ptr<Data::Mesh>>& meshes) {

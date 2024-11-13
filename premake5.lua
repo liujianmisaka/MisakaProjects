@@ -27,6 +27,7 @@ project "Assets"
         -- shaders
         "%{prj.location}/**.vert",
         "%{prj.location}/**.frag",
+        "%{prj.location}/**.sc"
     }
 
 

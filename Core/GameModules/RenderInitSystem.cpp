@@ -15,11 +15,12 @@ import <sstream>;
 import <iostream>;
 import Misaka.Core.Component.WindowDataComponent;
 import Misaka.Core.GameModule.Interface.IInitSystem;
+import Misaka.Core.Renderer.Renderer;
 
 namespace Misaka::Core::GameModules {
 
 static void FramebufferSizeCallback(GLFWwindow *window, int width, int height) {
-    bgfx::reset(width, height, BGFX_RESET_VSYNC);
+    Renderer::Renderer::OnWindowResize(width, height);
     Component::WindowDataComponent::Instance().width  = width;
     Component::WindowDataComponent::Instance().height = height;
 }
@@ -45,18 +46,7 @@ void RenderInitSystem::Initialize() {
         std::cerr << "Failed to initialize GLAD" << std::endl;
     }
 
-    bgfx::Init init;
-    init.type              = bgfx::RendererType::OpenGL;
-    init.vendorId          = BGFX_PCI_ID_NVIDIA;
-    init.platformData.nwh  = glfwGetWin32Window(glfwWindowComponent.window);
-    init.platformData.ndt  = nullptr;
-    init.resolution.width  = glfwWindowComponent.width;
-    init.resolution.height = glfwWindowComponent.height;
-    init.resolution.reset  = BGFX_RESET_VSYNC;
-    bgfx::init(init);
-
-    bgfx::setViewClear(0, BGFX_CLEAR_COLOR | BGFX_CLEAR_DEPTH, 0x6495EDFF, 1.0f, 0);
-    bgfx::setViewRect(0, 0, 0, glfwWindowComponent.width, glfwWindowComponent.height);
+    Renderer::Renderer::Init();
 }
 
 } // namespace Misaka::Core::GameModules

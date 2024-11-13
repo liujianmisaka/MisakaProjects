@@ -21,16 +21,14 @@ public:
         bgfx::setIndexBuffer(m_IndexBufferHandle);
     }
 
-    static std::shared_ptr<IndexBuffer> Create(uint16_t* indices);
+    static std::shared_ptr<IndexBuffer> Create(unsigned int* indices) {
+        auto indexBuffer                 = std::make_shared<IndexBuffer>();
+        indexBuffer->m_IndexBufferHandle = bgfx::createIndexBuffer(bgfx::makeRef(indices, sizeof(indices)));
+        return indexBuffer;
+    }
 
 private:
     bgfx::IndexBufferHandle m_IndexBufferHandle;
 };
-
-std::shared_ptr<IndexBuffer> IndexBuffer::Create(uint16_t* indices) {
-    auto indexBuffer                 = std::make_shared<IndexBuffer>();
-    indexBuffer->m_IndexBufferHandle = bgfx::createIndexBuffer(bgfx::makeRef(indices, sizeof(indices)));
-    return indexBuffer;
-}
 
 } // namespace Misaka::Core::Renderer

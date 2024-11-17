@@ -21,13 +21,12 @@ public:
         bgfx::setIndexBuffer(m_IndexBufferHandle);
     }
 
-    static std::shared_ptr<IndexBuffer> Create(unsigned int* indices) {
-        auto indexBuffer                 = std::make_shared<IndexBuffer>();
-        indexBuffer->m_IndexBufferHandle = bgfx::createIndexBuffer(bgfx::makeRef(indices, sizeof(indices)));
-        return indexBuffer;
+    static std::shared_ptr<IndexBuffer> Create(uint16_t* indices, uint32_t size) {
+        auto buffer                 = std::make_shared<IndexBuffer>();
+        buffer->m_IndexBufferHandle = bgfx::createIndexBuffer(bgfx::makeRef(indices, size));
+        return buffer;
     }
 
-private:
     bgfx::IndexBufferHandle m_IndexBufferHandle;
 };
 

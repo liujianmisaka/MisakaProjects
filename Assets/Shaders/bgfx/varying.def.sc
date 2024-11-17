@@ -1,7 +1,5 @@
-#if BGFX_SHADER_LANGUAGE_GLSL
-    #define varying out
-#else
-    #define varying varying
-#endif
+vec3 a_position : POSITION;
+vec4 a_color0 : COLOR0;
 
-varying vec4 v_color0;
+vec4 v_color0 : COLOR0;
+

@@ -29,7 +29,7 @@ REM 支持的平台列表（可根据需要修改）
 set PLATFORM=windows
 
 REM 设置 shader profile (例如：ps_5_0, spirv, 120, 130, 330)
-set SHADER_PROFILE=130
+set SHADER_PROFILE=150
 
 REM 查找并编译所有 vs_*.sc 和 fs_*.sc 着色器
 for /r "%SHADER_ROOT%" %%f in (vs_*.sc fs_*.sc) do (

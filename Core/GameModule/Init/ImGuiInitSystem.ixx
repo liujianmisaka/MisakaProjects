@@ -10,13 +10,13 @@ module;
 #define GLFW_EXPOSE_NATIVE_WIN32
 #include <GLFW/glfw3native.h>
 
-export module Misaka.Core.GameModules.ImGuiInitSystem;
+export module Misaka.Core.GameModule.ImGuiInitSystem;
 
 import <iostream>;
 import Misaka.Core.Component.WindowDataComponent;
 import Misaka.Core.GameModule.Interface.IInitSystem;
 
-namespace Misaka::Core::GameModules {
+namespace Misaka::Core::GameModule {
 
 export class ImGuiInitSystem : public IInitSystem {
 public:
@@ -45,4 +45,4 @@ public:
     }
 };
 
-} // namespace Misaka::Core::GameModules
+} // namespace Misaka::Core::GameModule

@@ -1,4 +1,4 @@
-export module Misaka.Core.Utils.SingletonManager;
+export module Misaka.Core.SingletonManager;
 
 import <any>;
 import <memory>;
@@ -8,13 +8,13 @@ import <mutex>;
 import <typeindex>;
 import <stdexcept>;
 
-namespace Misaka::Core::Utils {
+namespace Misaka::Core {
 
 export class SingletonManager {
 public:
     // 获取单例对象
     template <typename T>
-    static T& GetInstance() {
+    static std::shared_ptr<T> GetInstance() {
         const std::type_index key = typeid(std::type_identity_t<T>);
 
         std::scoped_lock lock(m_Mutex); // 确保线程安全
@@ -22,12 +22,12 @@ public:
 
         if (it == m_Instances.end()) {
             // 如果单例尚未创建，则创建并保存
-            T* instance      = new T();
-            m_Instances[key] = std::shared_ptr<T>(instance);
-            return *instance;
+            auto instance = std::make_shared<T>();
+            m_Instances[key] = instance;
+            return instance;
         }
 
-        return *std::any_cast<std::shared_ptr<T>>(it->second);
+        return std::any_cast<std::shared_ptr<T>>(it->second);
     }
 
     // 销毁单例对象
@@ -51,4 +51,4 @@ private:
     static inline std::mutex                                    m_Mutex;
 };
 
-} // namespace Misaka::Core::Utils
+} // namespace Misaka::Core

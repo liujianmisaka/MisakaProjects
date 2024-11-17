@@ -6,6 +6,7 @@ export module Misaka.Core.Renderer.VertexBuffer;
 
 import <memory>;
 import Misaka.Core.Renderer.VertexLayout;
+import Misaka.Core.Data.StaticMesh;
 
 namespace Misaka::Core::Renderer {
 
@@ -22,16 +23,13 @@ public:
         bgfx::setVertexBuffer(viewId, m_VertexBufferHandle);
     }
 
-    static std::shared_ptr<VertexBuffer> Create(float* vertices, VertexLayout layout);
+    static std::shared_ptr<VertexBuffer> Create(Data::Vertex* vertices, uint32_t size, bgfx::VertexLayout layout) {
+        auto buffer                  = std::make_shared<VertexBuffer>();
+        buffer->m_VertexBufferHandle = bgfx::createVertexBuffer(bgfx::makeRef(vertices, size), layout);
+        return buffer;
+    }
 
-private:
     bgfx::VertexBufferHandle m_VertexBufferHandle;
 };
-
-std::shared_ptr<VertexBuffer> VertexBuffer::Create(float* vertices, VertexLayout layout) {
-    auto vertexBuffer                  = std::make_shared<VertexBuffer>();
-    vertexBuffer->m_VertexBufferHandle = bgfx::createVertexBuffer(bgfx::makeRef(vertices, sizeof(vertices)), layout);
-    return vertexBuffer;
-}
 
 } // namespace Misaka::Core::Renderer

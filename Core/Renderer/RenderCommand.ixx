@@ -8,6 +8,7 @@ module;
 
 export module Misaka.Core.Renderer.RenderCommand;
 
+import <iostream>;
 import Misaka.Core.Component.WindowDataComponent;
 import Misaka.Core.Renderer.IndexBuffer;
 import Misaka.Core.Renderer.VertexBuffer;
@@ -29,20 +30,26 @@ public:
         init.resolution.width  = glfwWindowComponent.width;
         init.resolution.height = glfwWindowComponent.height;
         init.resolution.reset  = BGFX_RESET_VSYNC;
-        bgfx::init(init);
+
+        if (!bgfx::init(init)) {
+            std::cerr << "Failed to initialize bgfx" << std::endl;
+            return;
+        }
 
         bgfx::setViewClear(0, BGFX_CLEAR_COLOR | BGFX_CLEAR_DEPTH, 0x6495EDFF, 1.0f, 0);
         bgfx::setViewRect(0, 0, 0, glfwWindowComponent.width, glfwWindowComponent.height);
+        bgfx::setState(BGFX_STATE_DEFAULT);
     }
 
     static void Shutdown() {
         bgfx::shutdown();
     }
 
-    static void SubmitIndex(const VertexBuffer& vertexBuffer, const IndexBuffer& indexBuffer, const Shader& shader, uint16_t viewId = 0) {
-        vertexBuffer.Bind(viewId);
-        indexBuffer.Bind();
-        bgfx::submit(viewId, shader);
+    static void SubmitIndex(std::shared_ptr<VertexBuffer> vertexBuffer, std::shared_ptr<IndexBuffer> indexBuffer,
+                            std::shared_ptr<Shader> shader, uint16_t viewId = 0) {
+        vertexBuffer->Bind(viewId);
+        indexBuffer->Bind();
+        bgfx::submit(viewId, shader->GetProgram());
     }
 
     static void DrawFrame() {

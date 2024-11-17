@@ -9,21 +9,24 @@ import Misaka.Core.Renderer.VertexBuffer;
 import Misaka.Core.Renderer.IndexBuffer;
 import Misaka.Core.Renderer.Shader;
 
-namespace Misaka::Core::Resource::Data {
+namespace Misaka::Core::Component::Data {
 
-struct RenderData {
-    Renderer::VertexBuffer vertexBuffer;
-    Renderer::IndexBuffer  indexBuffer;
-    Renderer::Shader       shader;
+export struct RenderData {
+    std::shared_ptr<Renderer::VertexBuffer> vertexBuffer;
+    std::shared_ptr<Renderer::IndexBuffer>  indexBuffer;
+    std::shared_ptr<Renderer::Shader>       shader;
+
+    bool hasTexture = false;
+
 };
 
-} // namespace Misaka::Core::Resource::Data
+} // namespace Misaka::Core::Component::Data
 
 namespace Misaka::Core::Component {
 
 export class RenderComponent : public IComponent {
 public:
-    std::vector<std::shared_ptr<Resource::Data::RenderData>> renderDatas;
+    std::vector<Data::RenderData> renderDatas;
 };
 
 } // namespace Misaka::Core::Component

@@ -2,7 +2,7 @@ export module Misaka.Core.GameModule.Interface.IInitSystem;
 
 import Misaka.Core.GameModule.Interface.ISystem;
 
-namespace Misaka::Core::GameModules {
+namespace Misaka::Core::GameModule {
 
 export class IInitSystem {
 public:
@@ -10,4 +10,4 @@ public:
     virtual void Initialize() = 0;
 };
 
-} // namespace Misaka::Core::GameModules
+} // namespace Misaka::Core::GameModule

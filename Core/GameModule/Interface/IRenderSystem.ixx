@@ -2,7 +2,7 @@ export module Misaka.Core.GameModule.Interface.IRenderSystem;
 
 import Misaka.Core.GameModule.Interface.ISystem;
 
-namespace Misaka::Core::GameModules {
+namespace Misaka::Core::GameModule {
 
 export class IRenderSystem : public ISystem {
 public:
@@ -10,4 +10,4 @@ public:
     virtual void Render()    = 0;
 };
 
-} // namespace Misaka::Core::GameModules
+} // namespace Misaka::Core::GameModule

@@ -2,7 +2,7 @@ export module Misaka.Core.GameModule.Interface.IExcuteSystem;
 
 import Misaka.Core.GameModule.Interface.ISystem;
 
-namespace Misaka::Core::GameModules {
+namespace Misaka::Core::GameModule {
 
 export class IExcuteSystem : public ISystem {
 public:
@@ -10,4 +10,4 @@ public:
     virtual void Excute() = 0;
 };
 
-} // namespace Misaka::Core::GameModules
+} // namespace Misaka::Core::GameModule

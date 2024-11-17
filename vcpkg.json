@@ -4,27 +4,27 @@
     "dependencies": [
         {
             "name": "glfw3",
-            "platform": "(windows & x64) | (windows & x86)"
+            "platform": "(windows & x64) "
         },
         {
             "name": "glad",
-            "platform": "(windows & x64) | (windows & x86)"
+            "platform": "(windows & x64)"
         },
         {
             "name": "glm",
-            "platform": "(windows & x64) | (windows & x86)"
+            "platform": "(windows & x64)"
         },
         {
             "name": "entt",
-            "platform": "(windows & x64) | (windows & x86)"
+            "platform": "(windows & x64)"
         },
         {
             "name": "assimp",
-            "platform": "(windows & x64) | (windows & x86)"
+            "platform": "(windows & x64)"
         },
         {
             "name": "imgui",
-            "platform": "(windows & x64) | (windows & x86)",
+            "platform": "(windows & x64)",
             "features": [
                 "docking-experimental",
                 "glfw-binding",
@@ -33,7 +33,7 @@
         },
         {
             "name": "bgfx",
-            "platform": "(windows & x64) | (windows & x86)"
+            "platform": "(windows & x64)"
         }
     ]
 }

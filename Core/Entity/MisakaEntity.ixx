@@ -20,7 +20,11 @@ public:
 
     template <typename T>
     T& GetComponent() {
-        return m_Registry->get<T>(m_Entity);
+        if (HasComponent<T>()) {
+            return m_Registry->get<T>(m_Entity);
+        } else {
+            return AddComponent<T>();
+        }
     }
 
     template <typename T>

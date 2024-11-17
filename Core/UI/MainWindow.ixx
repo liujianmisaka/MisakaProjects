@@ -15,6 +15,7 @@ export module Misaka.Core.UI.MainWindow;
 import <iostream>;
 import Misaka.Core.Context.Context;
 import Misaka.Core.Component.WindowDataComponent;
+import Misaka.Core.Component.FrameBufferComponent;
 
 namespace Misaka::Core::UI {
 
@@ -32,8 +33,8 @@ public:
 
     void Draw() {
         // Note: Switch this to true to enable dockspace
-        static bool               dockspaceOpen             = false;
-        static bool               opt_fullscreen_persistant = false;
+        static bool               dockspaceOpen             = true;
+        static bool               opt_fullscreen_persistant = true;
         bool                      opt_fullscreen            = opt_fullscreen_persistant;
         static ImGuiDockNodeFlags dockspace_flags           = ImGuiDockNodeFlags_None;
 
@@ -114,71 +115,15 @@ public:
         // m_ViewportHovered = ImGui::IsWindowHovered();
         // Application::Get().GetImGuiLayer()->BlockEvents(!m_ViewportFocused && !m_ViewportHovered);
 
-        // ImVec2 viewportPanelSize = ImGui::GetContentRegionAvail();
-        // m_ViewportSize           = {viewportPanelSize.x, viewportPanelSize.y};
+        auto&  frameBufferComponent = Component::FrameBufferComponent::Instance();
+        ImVec2 viewportPanelSize    = ImGui::GetContentRegionAvail();
+        frameBufferComponent.viewportFrameBuffer->SetViewportSize(viewportPanelSize.x, viewportPanelSize.y);
 
-        // uint64_t textureID = m_Framebuffer->GetColorAttachmentRendererID();
-        // ImGui::Image(reinterpret_cast<void*>(textureID), ImVec2{m_ViewportSize.x, m_ViewportSize.y}, ImVec2{0, 1}, ImVec2{1, 0});
-
-        // if (ImGui::BeginDragDropTarget()) {
-        //     if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("CONTENT_BROWSER_ITEM")) {
-        //         const auto* path = static_cast<const wchar_t*>(payload->Data);
-        //         OpenScene(std::filesystem::path(g_AssetPath) / path);
-        //     }
-        //     ImGui::EndDragDropTarget();
-        // }
-
-        // Gizmos
-        // Entity selectedEntity = m_SceneHierarchyPanel.GetSelectedEntity();
-        // if (selectedEntity && m_GizmoType != -1) {
-        //    ImGuizmo::SetOrthographic(false);
-        //    ImGuizmo::SetDrawlist();
-
-        //    ImGuizmo::SetRect(m_ViewportBounds[0].x, m_ViewportBounds[0].y, m_ViewportBounds[1].x - m_ViewportBounds[0].x,
-        //                      m_ViewportBounds[1].y - m_ViewportBounds[0].y);
-
-        // Camera
-
-        // Runtime camera from entity
-        // auto cameraEntity = m_ActiveScene->GetPrimaryCameraEntity();
-        // const auto& camera = cameraEntity.GetComponent<CameraComponent>().Camera;
-        // const glm::mat4& cameraProjection = camera.GetProjection();
-        // glm::mat4 cameraView = glm::inverse(cameraEntity.GetComponent<TransformComponent>().GetTransform());
-
-        // Editor camera
-        //    const glm::mat4& cameraProjection = m_EditorCamera.GetProjection();
-        //    glm::mat4        cameraView       = m_EditorCamera.GetViewMatrix();
-
-        //    // Entity transform
-        //    auto&     tc        = selectedEntity.GetComponent<TransformComponent>();
-        //    glm::mat4 transform = tc.GetTransform();
-
-        //    // Snapping
-        //    bool  snap      = Input::IsKeyPressed(Key::LeftControl);
-        //    float snapValue = 0.5f; // Snap to 0.5m for translation/scale
-        //    // Snap to 45 degrees for rotation
-        //    if (m_GizmoType == ImGuizmo::OPERATION::ROTATE) snapValue = 45.0f;
-
-        //    float snapValues[3] = {snapValue, snapValue, snapValue};
-
-        //    ImGuizmo::Manipulate(glm::value_ptr(cameraView), glm::value_ptr(cameraProjection), (ImGuizmo::OPERATION)m_GizmoType,
-        //                         ImGuizmo::LOCAL, glm::value_ptr(transform), nullptr, snap ? snapValues : nullptr);
-
-        //    if (ImGuizmo::IsUsing()) {
-        //        glm::vec3 translation, rotation, scale;
-        //        Math::DecomposeTransform(transform, translation, rotation, scale);
-
-        //        glm::vec3 deltaRotation = rotation - tc.Rotation;
-        //        tc.Translation          = translation;
-        //        tc.Rotation += deltaRotation;
-        //        tc.Scale = scale;
-        //    }
-        //}
+        ImTextureID textureID = (ImTextureID)Component::FrameBufferComponent::Instance().viewportFrameBuffer->GetTextureIndex();
+        ImGui::Image(textureID, ImVec2{viewportPanelSize.x, viewportPanelSize.y}, ImVec2{0, 0}, ImVec2{1, 1});
 
         ImGui::End();
         ImGui::PopStyleVar();
-
-        // UI_Toolbar();
 
         ImGui::End();
     }
@@ -186,8 +131,6 @@ public:
     void EndFrame() {
         ImGui::Render();
         ImGui_Implbgfx_RenderDrawLists(ImGui::GetDrawData());
-        bgfx::setViewRect(0, 0, 0, Component::WindowDataComponent::Instance().width, Component::WindowDataComponent::Instance().height);
-        bgfx::frame();
     }
 
     void Shutdown() {

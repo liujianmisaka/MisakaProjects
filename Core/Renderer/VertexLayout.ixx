@@ -33,7 +33,6 @@ public:
         return VertexLayout();
     }
 
-private:
     bgfx::VertexLayout m_VertexLayout;
 };
 

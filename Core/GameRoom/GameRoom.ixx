@@ -10,37 +10,39 @@ import Misaka.Core.GameModule.Interface.IExcuteSystem;
 import Misaka.Core.GameModule.Interface.IRenderSystem;
 import Misaka.Core.GameModule.AssetUpLoadSystem;
 import Misaka.Core.GameModule.RenderSystem;
+import Misaka.Core.SingletonManager;
+import Misaka.Core.Utils.Registry;
 
 namespace Misaka::Core::GameRoom {
 
 export class GameRoom {
 public:
     void Init() {
-        m_ExcuteSystem.emplace_back(std::make_shared<GameModules::AssetUpLoadSystem>());
-        m_RenderSystem.emplace_back(std::make_shared<GameModules::RenderSystem>());
+        m_ExcuteSystem.emplace_back(std::make_shared<GameModule::AssetUpLoadSystem>());
+        m_RenderSystem.emplace_back(std::make_shared<GameModule::RenderSystem>());
     }
 
     Entity::MisakaEntity AddEntity() {
-        auto& registry = Context::Context::Instance().gameRoomContext.Registry;
+        auto registry = SingletonManager::GetInstance<Utils::Registry>();
         auto  entity   = registry->create();
         return Entity::MisakaEntity(entity, registry);
     }
 
     void Excute() {
         for (auto& system : m_ExcuteSystem) {
-            std::dynamic_pointer_cast<GameModules::IExcuteSystem>(system)->Excute();
+            std::dynamic_pointer_cast<GameModule::IExcuteSystem>(system)->Excute();
         }
     }
 
     void Render() {
         for (auto& system : m_RenderSystem) {
-            std::dynamic_pointer_cast<GameModules::IRenderSystem>(system)->Render();
+            std::dynamic_pointer_cast<GameModule::IRenderSystem>(system)->Render();
         }
     }
 
 private:
-    std::vector<std::shared_ptr<GameModules::ISystem>> m_ExcuteSystem;
-    std::vector<std::shared_ptr<GameModules::ISystem>> m_RenderSystem;
+    std::vector<std::shared_ptr<GameModule::ISystem>> m_ExcuteSystem;
+    std::vector<std::shared_ptr<GameModule::ISystem>> m_RenderSystem;
 };
 
 } // namespace Misaka::Core::GameRoom

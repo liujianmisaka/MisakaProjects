@@ -2,8 +2,10 @@
 bin
 bin-int
 vcpkg_installed
+Release
 
 **.sln
 **.vcxproj
 **.vcxproj.filters
 **.user
+**.ini

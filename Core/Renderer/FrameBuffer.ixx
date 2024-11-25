@@ -26,7 +26,7 @@ public:
         return bgfx::getTexture(m_FrameBufferHandle).idx;
     }
 
-    uint16_t GetViewId() const {
+    uint8_t GetViewId() const {
         return m_ViewId;
     }
 
@@ -35,7 +35,7 @@ public:
         m_Height = height;
     }
 
-    static std::shared_ptr<FrameBuffer> Create(uint16_t width, uint16_t height, uint16_t viewId) {
+    static std::shared_ptr<FrameBuffer> Create(uint16_t width, uint16_t height, uint8_t viewId) {
         auto frameBuffer = std::make_shared<FrameBuffer>();
 
         auto colorTexture = bgfx::createTexture2D(width, height, false, 1, bgfx::TextureFormat::RGBA8, BGFX_TEXTURE_RT);
@@ -58,7 +58,7 @@ public:
 
 private:
     bgfx::FrameBufferHandle m_FrameBufferHandle;
-    uint16_t                m_ViewId;
+    uint8_t                m_ViewId;
     uint16_t                m_Width;
     uint16_t                m_Height;
     bgfx::TextureHandle     m_ColorTexture;

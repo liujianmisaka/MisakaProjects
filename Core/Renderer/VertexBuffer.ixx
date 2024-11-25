@@ -19,7 +19,7 @@ public:
         return m_VertexBufferHandle;
     }
 
-    void Bind(uint16_t viewId = 0) const {
+    void Bind(uint8_t viewId = 0) const {
         bgfx::setVertexBuffer(viewId, m_VertexBufferHandle);
     }
 

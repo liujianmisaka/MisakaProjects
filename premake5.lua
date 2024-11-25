@@ -39,13 +39,13 @@ project "Core"
     cppdialect "C++latest"
     staticruntime "on"
     enablemodules("on")
-    buildstlmodules("on")
+    buildstlmodules("off")
     scanformoduledependencies "true"
 
     buildoptions { "/utf-8", "/Zc:__cplusplus", "/Zc:preprocessor" }  -- 使用 UTF-8 编码
 
-    targetdir ("bin/" .. outputdir .. "/%{prj.name}")
-    objdir ("bin-int/" .. outputdir .. "/%{prj.name}")
+    targetdir ("bin/" .. outputdir .. "/Sandbox")
+    objdir ("bin-int/" .. outputdir .. "/Sandbox")
     
     
     files
@@ -61,37 +61,8 @@ project "Core"
     {
         -- Add the vcpkg include path
         "%{wks.location}/Core",  -- Include the Core project modules
-        VCPKG_INCLUDE
-    }
-
-    libdirs 
-    {
-        -- Add the vcpkg library path
-        VCPKG_DEBUG_LIB
-    }
-    
-    links
-    {
-        "assimp-vc143-mtd",
-        "bgfx",
-        "bimg",
-        "bimg_decode",
-        "bimg_encode",
-        "bx",
-        "draco",
-        "glad",
-        "glfw3",
-        "glm",
-        "imguid",
-        "kubazip",
-        "miniz",
-        "minizip",
-        "poly2tri",
-        "polyclipping",
-        "pugixml",
-        "squishd",
-        "tinyexr",
-        "zlibd",
+        VCPKG_INCLUDE,
+        VCPKG_INCLUDE .. "/bx/compat/msvc"
     }
     
     filter "system:windows"
@@ -107,21 +78,81 @@ project "Core"
         runtime "Debug"
         symbols "on"
 
+        -- buildoptions { "/Z7" }
+
+        libdirs 
+        {
+            -- Add the vcpkg library path
+            VCPKG_DEBUG_LIB
+        }
+
+        links
+        {
+            "assimp-vc143-mtd",
+            "bgfx",
+            "bimg",
+            "bimg_decode",
+            "bimg_encode",
+            "bx",
+            "draco",
+            "glad",
+            "glfw3",
+            "glm",
+            "imguid",
+            "kubazip",
+            "minizip",
+            "poly2tri",
+            "polyclipping",
+            "pugixml",
+            "squishd",
+            "zlibd",
+        }
+
     filter "configurations:Release"
         defines "CORE_RELEASE"
         runtime "Release"
         optimize "on"
 
+        libdirs 
+        {
+            -- Add the vcpkg library path
+            VCPKG_LIB
+        }
+
+        links
+        {
+            "assimp-vc143-mt",
+            "bgfx",
+            "bimg",
+            "bimg_decode",
+            "bimg_encode",
+            "bx",
+            "draco",
+            "glad",
+            "glfw3",
+            "glm",
+            "imgui",
+            "kubazip",
+            "minizip",
+            "poly2tri",
+            "polyclipping",
+            "pugixml",
+            "squish",
+            "zlib",
+        }
+
 -- Sandbox Project
 project "Sandbox"
     location "Sandbox"
-    kind "ConsoleApp"
+    kind "WindowedApp"
     language "C++"
     cppdialect "C++latest"
     staticruntime "on"
     enablemodules("on")
-    buildstlmodules("on")
+    buildstlmodules("off")
     scanformoduledependencies "true"
+
+    entrypoint "mainCRTStartup"  -- 指定入口点为 mainCRTStartup
 
     buildoptions { "/utf-8", "/Zc:__cplusplus" }  -- 使用 UTF-8 编码
     
@@ -159,6 +190,8 @@ project "Sandbox"
         runtime "Debug"
         symbols "on"
 
+        -- buildoptions { "/Z7" }
+
     filter "configurations:Release"
         defines "SANDBOX_RELEASE"
         runtime "Release"
@@ -193,36 +226,6 @@ project "Test"
         VCPKG_INCLUDE  -- Include vcpkg dependencies
     }
 
-    libdirs 
-    {
-        -- Add the vcpkg library path
-        VCPKG_DEBUG_LIB
-    }
-
-    links
-    {
-        "assimp-vc143-mtd",
-        "bgfx",
-        "bimg",
-        "bimg_decode",
-        "bimg_encode",
-        "bx",
-        "draco",
-        "glad",
-        "glfw3",
-        "glm",
-        "imguid",
-        "kubazip",
-        "miniz",
-        "minizip",
-        "poly2tri",
-        "polyclipping",
-        "pugixml",
-        "squishd",
-        "tinyexr",
-        "zlibd",
-    }
-
     filter "system:windows"
         systemversion "latest"
         defines 
@@ -235,7 +238,63 @@ project "Test"
         runtime "Debug"
         symbols "on"
 
+        libdirs 
+        {
+            -- Add the vcpkg library path
+            VCPKG_DEBUG_LIB
+        }
+
+        links
+        {
+            "assimp-vc143-mtd",
+            "bgfx",
+            "bimg",
+            "bimg_decode",
+            "bimg_encode",
+            "bx",
+            "draco",
+            "glad",
+            "glfw3",
+            "glm",
+            "imguid",
+            "kubazip",
+            "minizip",
+            "poly2tri",
+            "polyclipping",
+            "pugixml",
+            "squishd",
+            "zlibd",
+        }
+
     filter "configurations:Release"
         defines "Test_RELEASE"
         runtime "Release"
         optimize "on"
+
+        libdirs 
+        {
+            -- Add the vcpkg library path
+            VCPKG_LIB
+        }
+
+        links
+        {
+            "assimp-vc143-mt",
+            "bgfx",
+            "bimg",
+            "bimg_decode",
+            "bimg_encode",
+            "bx",
+            "draco",
+            "glad",
+            "glfw3",
+            "glm",
+            "imgui",
+            "kubazip",
+            "minizip",
+            "poly2tri",
+            "polyclipping",
+            "pugixml",
+            "squish",
+            "zlib",
+        }

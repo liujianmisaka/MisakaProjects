@@ -27,7 +27,7 @@ export class AssetUpLoadSystem : public IExcuteSystem {
 public:
     virtual ~AssetUpLoadSystem() = default;
     virtual void Excute() override {
-        auto registry = SingletonManager::GetInstance<entt::registry>();
+        auto registry = SingletonManager::GetInstance<Utils::Registry>();
 
         for (auto entity : registry->view<Component::MeshComponent>()) {
             Entity::MisakaEntity misakaEntity = Entity::MisakaEntity(entity, registry);
@@ -39,6 +39,7 @@ public:
             layout.begin()
                 .add(bgfx::Attrib::Position, 3, bgfx::AttribType::Float)
                 .add(bgfx::Attrib::Color0, 4, bgfx::AttribType::Float)
+                .add(bgfx::Attrib::TexCoord0, 2, bgfx::AttribType::Float)
                 .end();
             auto shader = SingletonManager::GetInstance<Manager::ShaderManager>()->GetShader("base");
 

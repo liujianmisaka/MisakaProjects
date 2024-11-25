@@ -36,7 +36,7 @@ public:
     static void EndScene() {};
 
     static void Submit(std::shared_ptr<VertexBuffer> vertexBuffer, std::shared_ptr<IndexBuffer> indexBuffer, std::shared_ptr<Shader> shader,
-                       uint16_t viewId = 0) {
+                       uint8_t viewId = 0) {
         RenderCommand::SubmitIndex(vertexBuffer, indexBuffer, shader, viewId);
     }
 

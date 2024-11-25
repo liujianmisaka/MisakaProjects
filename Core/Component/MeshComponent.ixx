@@ -10,6 +10,10 @@ export class MeshComponent : public IComponent {
 public:
     std::vector<std::string> meshes;
 
+    void AddMesh(const std::string& mesh) {
+        meshes.push_back(mesh);
+    }
+
     bool dirty = true;
 };
 

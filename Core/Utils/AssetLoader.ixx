@@ -56,13 +56,22 @@ private:
             // position
             vertex.position[0] = assimpMesh->mVertices[i].x;
             vertex.position[1] = assimpMesh->mVertices[i].y;
-            vertex.position[2] = 0.0f;
+            vertex.position[2] = assimpMesh->mVertices[i].z;
 
             // color
             vertex.color[0] = 0.5f;
             vertex.color[1] = 0.5f;
             vertex.color[2] = 0.5f;
             vertex.color[3] = 1.0f;
+
+            // texcoord
+            if (assimpMesh->mTextureCoords[0]) {
+                vertex.texcoord[0] = assimpMesh->mTextureCoords[0][i].x;
+                vertex.texcoord[1] = assimpMesh->mTextureCoords[0][i].y;
+            } else {
+                vertex.texcoord[0] = 0.0f;
+                vertex.texcoord[1] = 0.0f;
+            }
 
             subMesh.vertices.push_back(vertex);
         }

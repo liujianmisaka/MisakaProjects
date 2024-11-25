@@ -1,3 +1,3 @@
 @echo off
 .\Vendor\premake5.exe vs2022
-pause
+echo [INFO] 项目文件已生成.

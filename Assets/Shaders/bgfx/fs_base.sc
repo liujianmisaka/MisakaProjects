@@ -1,5 +1,7 @@
-$input v_color0
+$input v_color0, v_texcoord0
+
+uniform sampler2D s_tex;
 
 void main() {
-    gl_FragColor = v_color0;
+    gl_FragColor = texture2D(s_tex, v_texcoord0);
 }

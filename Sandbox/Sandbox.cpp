@@ -1,7 +1,7 @@
-import Misaka.Core.Utils.GameController;
+import Misaka.Core.GameController;
 
 int main() {
-    Misaka::Core::Utils::GameController gameController;
+    Misaka::Core::GameController gameController;
 
     gameController.Run();
 

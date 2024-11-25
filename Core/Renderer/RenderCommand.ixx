@@ -39,6 +39,7 @@ public:
         bgfx::setViewClear(0, BGFX_CLEAR_COLOR | BGFX_CLEAR_DEPTH, 0x6495EDFF, 1.0f, 0);
         bgfx::setViewRect(0, 0, 0, glfwWindowComponent.width, glfwWindowComponent.height);
         bgfx::setState(BGFX_STATE_DEFAULT);
+        bgfx::setState(BGFX_STATE_WRITE_Z | BGFX_STATE_DEPTH_TEST_LESS);
     }
 
     static void Shutdown() {
@@ -46,7 +47,7 @@ public:
     }
 
     static void SubmitIndex(std::shared_ptr<VertexBuffer> vertexBuffer, std::shared_ptr<IndexBuffer> indexBuffer,
-                            std::shared_ptr<Shader> shader, uint16_t viewId = 0) {
+                            std::shared_ptr<Shader> shader, uint8_t viewId = 0) {
         vertexBuffer->Bind(viewId);
         indexBuffer->Bind();
         bgfx::submit(viewId, shader->GetProgram());

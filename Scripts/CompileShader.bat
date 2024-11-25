@@ -61,6 +61,5 @@ for /r "%SHADER_ROOT%" %%f in (vs_*.sc fs_*.sc) do (
     )
 )
 
-echo [INFO] Shader compilation completed.
-pause
-exit /b 0
+echo [INFO] bgfx Shader 编译完成.
+endlocal

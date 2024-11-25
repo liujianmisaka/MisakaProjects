@@ -6,6 +6,6 @@ export module Misaka.Core.Utils.Registry;
 
 namespace Misaka::Core::Utils {
 
-export using Registry = entt::registry;
+export class Registry : public entt::registry {};
 
 } // namespace Misaka::Core::Utils

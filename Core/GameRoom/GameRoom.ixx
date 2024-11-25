@@ -3,7 +3,6 @@ export module Misaka.Core.GameRoom.GameRoom;
 import <entt/entt.hpp>;
 import <memory>;
 import <vector>;
-import Misaka.Core.Context.Context;
 import Misaka.Core.Entity.MisakaEntity;
 import Misaka.Core.GameModule.Interface.ISystem;
 import Misaka.Core.GameModule.Interface.IExcuteSystem;
@@ -12,6 +11,8 @@ import Misaka.Core.GameModule.AssetUpLoadSystem;
 import Misaka.Core.GameModule.RenderSystem;
 import Misaka.Core.SingletonManager;
 import Misaka.Core.Utils.Registry;
+import Misaka.Core.Component.TransformComponent;
+import Misaka.Core.Component.TagComponent;
 
 namespace Misaka::Core::GameRoom {
 
@@ -22,10 +23,13 @@ public:
         m_RenderSystem.emplace_back(std::make_shared<GameModule::RenderSystem>());
     }
 
-    Entity::MisakaEntity AddEntity() {
+    Entity::MisakaEntity AddEntity(const std::string name = "MisakaEntity") {
         auto registry = SingletonManager::GetInstance<Utils::Registry>();
         auto  entity   = registry->create();
-        return Entity::MisakaEntity(entity, registry);
+        auto misakEntity = Entity::MisakaEntity(entity, registry);
+        misakEntity.AddComponent<Component::TagComponent>(name);
+        misakEntity.AddComponent<Component::TransformComponent>();
+        return misakEntity;
     }
 
     void Excute() {

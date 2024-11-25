@@ -1,6 +1,7 @@
 module;
 
 #include <imgui.h>
+#include <imgui_internal.h>
 #include <bgfx/bgfx.h>
 #include <bgfx/platform.h>
 #include "imgui_impl_bgfx.h"
@@ -9,13 +10,22 @@ module;
 #include <GLFW/glfw3.h>
 #define GLFW_EXPOSE_NATIVE_WIN32
 #include <GLFW/glfw3native.h>
+#include <glm/glm.hpp>
+#include <glm/gtc/type_ptr.hpp> // Add this include for glm::value_ptr
+#include <entt/entt.hpp>
 
 export module Misaka.Core.UI.MainWindow;
 
 import <iostream>;
-import Misaka.Core.Context.Context;
 import Misaka.Core.Component.WindowDataComponent;
 import Misaka.Core.Component.FrameBufferComponent;
+import Misaka.Core.CoreConfig;
+import Misaka.Core.SingletonManager;
+import Misaka.Core.Utils.Registry;
+import Misaka.Core.Entity.MisakaEntity;
+import Misaka.Core.Component.TagComponent;
+import Misaka.Core.Component.TransformComponent;
+import Misaka.Core.Component.MeshComponent;
 
 namespace Misaka::Core::UI {
 
@@ -95,32 +105,68 @@ public:
             ImGui::EndMenuBar();
         }
 
-        ImGui::Begin("Stats");
-
-        ImGui::End();
+        SceneHierarchy();
 
         ImGui::Begin("Settings");
-        ImGui::Text("Hello, world!");
+
+        // Set MVP Matrix
+        auto fov = glm::degrees(CoreConfig::fov);
+        ImGui::DragFloat("FOV", &fov, 0.1f, 0.0f, 180.0f);
+        CoreConfig::fov        = glm::radians(fov);
+        CoreConfig::projection = glm::perspective(CoreConfig::fov, CoreConfig::aspectRatio, CoreConfig::nearPlane, CoreConfig::farPlane);
+
         ImGui::End();
 
         ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2{0, 0});
         ImGui::Begin("Viewport");
-        auto viewportMinRegion = ImGui::GetWindowContentRegionMin();
-        auto viewportMaxRegion = ImGui::GetWindowContentRegionMax();
-        auto viewportOffset    = ImGui::GetWindowPos();
-        // m_ViewportBounds[0]    = {viewportMinRegion.x + viewportOffset.x, viewportMinRegion.y + viewportOffset.y};
-        // m_ViewportBounds[1]    = {viewportMaxRegion.x + viewportOffset.x, viewportMaxRegion.y + viewportOffset.y};
 
-        // m_ViewportFocused = ImGui::IsWindowFocused();
-        // m_ViewportHovered = ImGui::IsWindowHovered();
-        // Application::Get().GetImGuiLayer()->BlockEvents(!m_ViewportFocused && !m_ViewportHovered);
+        auto& frameBufferComponent = Component::FrameBufferComponent::Instance();
 
-        auto&  frameBufferComponent = Component::FrameBufferComponent::Instance();
-        ImVec2 viewportPanelSize    = ImGui::GetContentRegionAvail();
-        frameBufferComponent.viewportFrameBuffer->SetViewportSize(viewportPanelSize.x, viewportPanelSize.y);
+        // 获取视口尺寸
+        ImVec2 viewportPanelSize   = ImGui::GetContentRegionAvail();
+        float  viewportAspectRatio = viewportPanelSize.x / viewportPanelSize.y;
+
+        CoreConfig::aspectRatio = viewportAspectRatio;
+        CoreConfig::projection  = glm::perspective(CoreConfig::fov, CoreConfig::aspectRatio, CoreConfig::nearPlane, CoreConfig::farPlane);
+
+        // frameBufferComponent.viewportFrameBuffer->SetViewportSize(viewportPanelSize.x, viewportPanelSize.y);
 
         ImTextureID textureID = (ImTextureID)Component::FrameBufferComponent::Instance().viewportFrameBuffer->GetTextureIndex();
-        ImGui::Image(textureID, ImVec2{viewportPanelSize.x, viewportPanelSize.y}, ImVec2{0, 0}, ImVec2{1, 1});
+        ImGui::Image(textureID, viewportPanelSize, ImVec2{0, 1}, ImVec2{1, 0});
+
+        // Right-click on blank space
+        auto registry = SingletonManager::GetInstance<Utils::Registry>();
+        if (ImGui::BeginPopupContextWindow(nullptr, 1)) {
+            ImGui::PushStyleColor(ImGuiCol_PopupBg, ImVec4(0.15f, 0.15f, 0.15f, 0.9f));
+            ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(10, 5));
+
+            if (ImGui::MenuItem("  Create Empty Entity")) {
+                auto                 entity = registry->create();
+                Entity::MisakaEntity misakaEntity(entity, registry);
+                misakaEntity.AddComponent<Component::TagComponent>("MisakaEntity");
+                misakaEntity.AddComponent<Component::TransformComponent>();
+            }
+            if (ImGui::IsItemHovered()) {
+                ImGui::SetTooltip("Create an empty entity with no components.");
+            }
+
+            ImGui::Separator();
+
+            if (ImGui::MenuItem("  Create Cube Entity")) {
+                auto                 entity = registry->create();
+                Entity::MisakaEntity misakaEntity(entity, registry);
+                misakaEntity.AddComponent<Component::TagComponent>("cube");
+                misakaEntity.AddComponent<Component::TransformComponent>();
+                misakaEntity.AddComponent<Component::MeshComponent>().AddMesh("cube");
+            }
+            if (ImGui::IsItemHovered()) {
+                ImGui::SetTooltip("Create a cube entity with a mesh component.");
+            }
+
+            ImGui::PopStyleVar();
+            ImGui::PopStyleColor();
+            ImGui::EndPopup();
+        }
 
         ImGui::End();
         ImGui::PopStyleVar();
@@ -140,10 +186,360 @@ public:
         bgfx::shutdown();
     }
 
+    void SceneHierarchy() {
+        ImGui::Begin("Scene Hierarchy");
+
+        auto registry = SingletonManager::GetInstance<Utils::Registry>();
+
+        if (registry) {
+            for (auto entity : registry->view<entt::entity>()) {
+                auto misakaEntity = Entity::MisakaEntity(entity, registry);
+                DrawEntityNode(misakaEntity);
+            }
+
+            if (ImGui::IsMouseDown(0) && ImGui::IsWindowHovered()) {
+                m_SelectionEntity = {};
+            }
+        }
+
+        ImGui::End();
+
+        ImGui::Begin("Properties");
+        if (m_SelectionEntity) {
+            DrawComponents(m_SelectionEntity);
+        }
+        ImGui::End();
+    }
+
+    void DrawEntityNode(Entity::MisakaEntity entity) {
+        const auto& tag = entity.GetComponent<Component::TagComponent>().Tag;
+
+        ImGuiTreeNodeFlags flags = (m_SelectionEntity == entity ? ImGuiTreeNodeFlags_Selected : 0) | ImGuiTreeNodeFlags_OpenOnArrow;
+        // flags |= ImGuITreeNodeFlags_SpanAllAvailWidth;   // TODO: not support in this imgui version
+        const bool opened = ImGui::TreeNodeEx((void*)(uint64_t)(uint32_t)entity, flags, tag.c_str());
+
+        if (ImGui::IsItemClicked()) {
+            m_SelectionEntity = entity;
+        }
+
+        bool entityDeleted = false;
+        if (ImGui::BeginPopupContextItem()) {
+            if (ImGui::MenuItem("Delete Entity")) {
+                entityDeleted = true;
+            }
+            ImGui::EndPopup();
+        }
+
+        if (opened) {
+            ImGuiTreeNodeFlags flags     = ImGuiTreeNodeFlags_OpenOnArrow;
+            bool               subopened = ImGui::TreeNodeEx((void*)986468, flags, tag.c_str());
+            if (subopened) ImGui::TreePop();
+            ImGui::TreePop();
+        }
+
+        // delay delete entity
+        if (entityDeleted) {
+            auto registry = SingletonManager::GetInstance<Utils::Registry>();
+            registry->destroy(entity);
+            if (m_SelectionEntity == entity) {
+                m_SelectionEntity = {};
+            }
+        }
+    }
+
+    void DrawComponents(Entity::MisakaEntity entity) {
+        if (entity.HasComponent<Component::TagComponent>()) {
+            auto& tag = entity.GetComponent<Component::TagComponent>().Tag;
+
+            char buffer[256] = {};
+            strcpy_s(buffer, sizeof(buffer), tag.c_str());
+            if (ImGui::InputText("##Tag", buffer, sizeof(buffer))) {
+                tag = std::string(buffer);
+            }
+        }
+
+        ImGui::SameLine();
+        ImGui::PushItemWidth(-1);
+
+        if (ImGui::Button("Add Component")) ImGui::OpenPopup("AddComponent");
+
+        // if (ImGui::BeginPopup("AddComponent")) {
+        //     if (!m_SelectionEntity.HasComponent<CameraComponent>()) {
+        //         if (ImGui::MenuItem("Camera")) {
+        //             m_SelectionEntity.AddComponent<CameraComponent>();
+        //             ImGui::CloseCurrentPopup();
+        //         }
+        //     }
+
+        //    if (!m_SelectionEntity.HasComponent<SpriteRendererComponent>()) {
+        //        if (ImGui::MenuItem("Sprite Render")) {
+        //            m_SelectionEntity.AddComponent<SpriteRendererComponent>();
+        //            ImGui::CloseCurrentPopup();
+        //        }
+        //    }
+
+        //    if (!m_SelectionEntity.HasComponent<CircleRendererComponent>()) {
+        //        if (ImGui::MenuItem("Circle Renderer")) {
+        //            m_SelectionEntity.AddComponent<CircleRendererComponent>();
+        //            ImGui::CloseCurrentPopup();
+        //        }
+        //    }
+
+        //    if (!m_SelectionEntity.HasComponent<Rigidbody2DComponent>()) {
+        //        if (ImGui::MenuItem("Rigidbody 2D")) {
+        //            m_SelectionEntity.AddComponent<Rigidbody2DComponent>();
+        //            ImGui::CloseCurrentPopup();
+        //        }
+        //    }
+
+        //    if (!m_SelectionEntity.HasComponent<BoxCollider2DComponent>()) {
+        //        if (ImGui::MenuItem("BoxCollider 2D")) {
+        //            m_SelectionEntity.AddComponent<BoxCollider2DComponent>();
+        //            ImGui::CloseCurrentPopup();
+        //        }
+        //    }
+
+        //    if (!m_SelectionEntity.HasComponent<CircleCollider2DComponent>()) {
+        //        if (ImGui::MenuItem("CircleCollider 2D")) {
+        //            m_SelectionEntity.AddComponent<CircleCollider2DComponent>();
+        //            ImGui::CloseCurrentPopup();
+        //        }
+        //    }
+
+        //    ImGui::EndPopup();
+        //}
+
+        // ImGui::PopItemWidth();
+
+        // DrawComponent<TransformComponent>("Transform", entity, [](auto& component) {
+        //     // WHY: Where set Camera move style?
+        //     // NOTE: Camera move style is set in Render2D::BeginScene()
+        //     DrawVec3Control("Translation", component.Translation);
+        //     glm::vec3 rotation = glm::degrees(component.Rotation);
+        //     DrawVec3Control("Rotation", rotation);
+        //     component.Rotation = glm::radians(rotation);
+        //     DrawVec3Control("Scale", component.Scale, 1.0f);
+        // });
+
+        DrawComponent<Component::TransformComponent>("Transform", entity, [](Component::TransformComponent& component) {
+            // WHY: Where set Camera move style?
+            // NOTE: Camera move style is set in Render2D::BeginScene()
+            DrawVec3Control("Position", component.position);
+            DrawVec3Control("Rotation", component.rotation);
+            DrawVec3Control("Scale", component.scale, 1.0f);
+        });
+
+        // DrawComponent<CameraComponent>("Camera", entity, [](auto& component) {
+        //     auto& [camera, primary, fixedAspectRatio] = component;
+
+        //    ImGui::Checkbox("Primary", &primary);
+
+        //    const char* projectionTypeStrings[]     = {"Perspective", "Orthographic"};
+        //    const char* currentProjectionTypeString = projectionTypeStrings[static_cast<int>(camera.GetProjectionType())];
+        //    if (ImGui::BeginCombo("Projection", currentProjectionTypeString)) {
+        //        for (int i = 0; i < 2; i++) {
+        //            const bool isSelected = currentProjectionTypeString == projectionTypeStrings[i];
+        //            if (ImGui::Selectable(projectionTypeStrings[i], isSelected)) {
+        //                currentProjectionTypeString = projectionTypeStrings[i];
+        //                camera.SetProjectionType(static_cast<SceneCamera::ProjectionType>(i));
+        //            }
+
+        //            if (isSelected) ImGui::SetItemDefaultFocus();
+        //        }
+        //        ImGui::EndCombo();
+        //    }
+
+        //    if (camera.GetProjectionType() == SceneCamera::ProjectionType::Perspective) {
+        //        float perspectiveVerticalFov = glm::degrees(camera.GetPerspectiveVerticalFOV());
+        //        if (ImGui::DragFloat("Vertical FOV", &perspectiveVerticalFov))
+        //            camera.SetPerspectiveVerticalFOV(glm::radians(perspectiveVerticalFov));
+
+        //        float perspectiveNear = camera.GetPerspectiveNearClip();
+        //        if (ImGui::DragFloat("Near", &perspectiveNear)) camera.SetPerspectiveNearClip(perspectiveNear);
+
+        //        float perspectiveFar = camera.GetPerspectiveFarClip();
+        //        if (ImGui::DragFloat("Far", &perspectiveFar)) camera.SetPerspectiveFarClip(perspectiveFar);
+        //    }
+
+        //    if (camera.GetProjectionType() == SceneCamera::ProjectionType::Orthographic) {
+        //        float orthoSize = camera.GetOrthographicSize();
+        //        if (ImGui::DragFloat("Size", &orthoSize)) camera.SetOrthographicSize(orthoSize);
+
+        //        float orthoNear = camera.GetOrthographicNearClip();
+        //        if (ImGui::DragFloat("Near", &orthoNear)) camera.SetOrthographicNearClip(orthoNear);
+
+        //        float orthoFar = camera.GetOrthographicFarClip();
+        //        if (ImGui::DragFloat("Far", &orthoFar)) camera.SetOrthographicFarClip(orthoFar);
+
+        //        ImGui::Checkbox("FixedAspectRatio", &fixedAspectRatio);
+        //    }
+        //});
+
+        // DrawComponent<SpriteRendererComponent>("Sprite Render", entity, [](auto& component) {
+        //     ImGui::ColorEdit4("Color", glm::value_ptr(component.Color));
+
+        //    ImGui::Button("Texture", ImVec2(100.0f, 0.0f));
+        //    if (ImGui::BeginDragDropTarget()) {
+        //        if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("CONTENT_BROWSER_ITEM")) {
+        //            const wchar_t*        path        = (const wchar_t*)payload->Data;
+        //            std::filesystem::path texturePath = std::filesystem::path(g_AssetPath) / path;
+        //            Ref<Texture2D>        texture     = Texture2D::Create(texturePath.string());
+        //            if (texture->IsLoaded())
+        //                component.Texture = texture;
+        //            else
+        //                HZ_WARN("Could not load texture {0}", texturePath.filename().string());
+        //        }
+        //        ImGui::EndDragDropTarget();
+        //    }
+
+        //    ImGui::DragFloat("Tiling Factor", &component.TilingFactor, 0.1f, 0.0f, 100.0f);
+        //});
+
+        // DrawComponent<CircleRendererComponent>("Circle Renderer", entity, [](auto& component) {
+        //     ImGui::ColorEdit4("Color", glm::value_ptr(component.Color));
+        //     ImGui::DragFloat("Thickness", &component.Thickness, 0.025f, 0.0f, 1.0f);
+        //     ImGui::DragFloat("Fade", &component.Fade, 0.00025f, 0.0f, 1.0f);
+        // });
+
+        // DrawComponent<Rigidbody2DComponent>("Rigidbody 2D", entity, [](auto& component) {
+        //     const char* bodyTypeStrings[]     = {"Static", "Dynamic", "Kinematic"};
+        //     const char* currentBodyTypeString = bodyTypeStrings[static_cast<int>(component.Type)];
+        //     if (ImGui::BeginCombo("Body Type", currentBodyTypeString)) {
+        //         for (int i = 0; i < 2; i++) {
+        //             const bool isSelected = currentBodyTypeString == bodyTypeStrings[i];
+        //             if (ImGui::Selectable(bodyTypeStrings[i], isSelected)) {
+        //                 currentBodyTypeString = bodyTypeStrings[i];
+        //                 component.Type        = static_cast<Rigidbody2DComponent::BodyType>(i);
+        //             }
+
+        //            if (isSelected) ImGui::SetItemDefaultFocus();
+        //        }
+        //        ImGui::EndCombo();
+        //    }
+
+        //    ImGui::Checkbox("Fixed Rotation", &component.FixedRotation);
+        //});
+
+        // DrawComponent<BoxCollider2DComponent>("Box Collider 2D", entity, [](auto& component) {
+        //     ImGui::DragFloat2("Offset", glm::value_ptr(component.Offset));
+        //     ImGui::DragFloat2("Size", glm::value_ptr(component.Offset));
+        //     ImGui::DragFloat("Density", &component.Density, 0.01f, 0.0f, 1.0f);
+        //     ImGui::DragFloat("Friction", &component.Friction, 0.01f, 0.0f, 1.0f);
+        //     ImGui::DragFloat("Restitution", &component.Restitution, 0.01f, 0.0f, 1.0f);
+        //     ImGui::DragFloat("Restitution Threshold", &component.RestitutionThreshold, 0.01f, 0.0f);
+        // });
+
+        // DrawComponent<CircleCollider2DComponent>("Circle Collider 2D", entity, [](auto& component) {
+        //     ImGui::DragFloat2("Offset", glm::value_ptr(component.Offset));
+        //     ImGui::DragFloat("Radius", &component.Radius);
+        //     ImGui::DragFloat("Density", &component.Density, 0.01f, 0.0f, 1.0f);
+        //     ImGui::DragFloat("Friction", &component.Friction, 0.01f, 0.0f, 1.0f);
+        //     ImGui::DragFloat("Restitution", &component.Restitution, 0.01f, 0.0f, 1.0f);
+        //     ImGui::DragFloat("Restitution Threshold", &component.RestitutionThreshold, 0.01f, 0.0f);
+        // });
+    }
+
+    template <typename T, typename UIFunction>
+    static void DrawComponent(const std::string& name, Entity::MisakaEntity entity, UIFunction uiFunction) {
+        constexpr ImGuiTreeNodeFlags treeNodeFlags = ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_AllowItemOverlap |
+                                                     ImGuiTreeNodeFlags_Framed | ImGuiTreeNodeFlags_FramePadding;
+        // TODO: ImGuITreeNodeFlags_SpanAllAvailWidth is not support in this imgui version
+        if (entity.HasComponent<T>()) {
+            auto&  component          = entity.GetComponent<T>();
+            ImVec2 contentRegionAvail = ImGui::GetContentRegionAvail();
+
+            ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2{4, 4});
+            const float lineHeight = GImGui->Font->FontSize + GImGui->Style.FramePadding.y * 2.0f;
+            ImGui::Separator();
+            const bool open = ImGui::TreeNodeEx(reinterpret_cast<void*>(typeid(T).hash_code()), treeNodeFlags, name.c_str());
+            ImGui::PopStyleVar();
+            ImGui::SameLine(contentRegionAvail.x - lineHeight * 0.5f);
+            if (ImGui::Button("+", ImVec2{lineHeight, lineHeight})) {
+                ImGui::OpenPopup("ComponentSettings");
+            }
+
+            bool removeComponent = false;
+            if (ImGui::BeginPopup("ComponentSettings")) {
+                if (ImGui::MenuItem("Remove component")) removeComponent = true;
+
+                ImGui::EndPopup();
+            }
+
+            if (open) {
+                uiFunction(component);
+                ImGui::TreePop();
+            }
+
+            if (removeComponent) entity.RemoveComponent<T>();
+        }
+    }
+
+    static void DrawVec3Control(const std::string& label, glm::vec3& values, float resetValue = 0.0f, float columnWidth = 100.0f) {
+        ImGui::PushID(label.c_str());
+
+        auto boldFont = ImGui::GetIO().Fonts->Fonts[0];
+
+        ImGui::Columns(2);
+        ImGui::SetColumnWidth(0, columnWidth);
+        ImGui::Text(label.c_str());
+        ImGui::NextColumn();
+
+        ImGui::PushMultiItemsWidths(3, ImGui::CalcItemWidth());
+        ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2{0, 0});
+
+        // Learn: GImGui properties
+        const float  lineHeight = GImGui->Font->FontSize + GImGui->Style.FramePadding.y * 2.0f;
+        const ImVec2 buttonSize = {lineHeight + 3.0f, lineHeight};
+
+        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4{0.8f, 0.1f, 0.15f, 1.0f});
+        ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4{0.9f, 0.2f, 0.2f, 1.0f});
+        ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4{0.8f, 0.1f, 0.15f, 1.0f});
+        ImGui::PushFont(boldFont);
+        if (ImGui::Button("X", buttonSize)) values.x = resetValue;
+        ImGui::PopFont();
+        ImGui::PopStyleColor(3);
+        ImGui::SameLine();
+        ImGui::DragFloat("##X", &values.x, 0.1f, 0.0f, 0.0f, "%.2f");
+        ImGui::PopItemWidth();
+        ImGui::SameLine();
+
+        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4{0.2f, 0.7f, 0.2f, 1.0f});
+        ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4{0.3f, 0.8f, 0.3f, 1.0f});
+        ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4{0.2f, 0.7f, 0.2f, 1.0f});
+        ImGui::PushFont(boldFont);
+        if (ImGui::Button("Y", buttonSize)) values.y = resetValue;
+        ImGui::PopFont();
+        ImGui::PopStyleColor(3);
+        ImGui::SameLine();
+        ImGui::DragFloat("##Y", &values.y, 0.1f, 0.0f, 0.0f, "%.2f");
+        ImGui::PopItemWidth();
+        ImGui::SameLine();
+
+        ImGui::PushStyleColor(ImGuiCol_Button, ImVec4{0.1f, 0.25f, 0.8f, 1.0f});
+        ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4{0.2f, 0.35f, 0.9f, 1.0f});
+        ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImVec4{0.1f, 0.25f, 0.8f, 1.0f});
+        ImGui::PushFont(boldFont);
+        if (ImGui::Button("Z", buttonSize)) values.z = resetValue;
+        ImGui::PopFont();
+        ImGui::PopStyleColor(3);
+        ImGui::SameLine();
+        ImGui::DragFloat("##Z", &values.z, 0.1f, 0.0f, 0.0f, "%.2f");
+        ImGui::PopItemWidth();
+        ImGui::SameLine();
+
+        ImGui::PopStyleVar();
+
+        ImGui::Columns(1);
+
+        ImGui::PopID();
+    }
+
 private:
     bool   show_demo_window    = true;
     bool   show_another_window = false;
     ImVec4 clear_color         = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
+
+    Entity::MisakaEntity m_SelectionEntity;
 };
 
 } // namespace Misaka::Core::UI

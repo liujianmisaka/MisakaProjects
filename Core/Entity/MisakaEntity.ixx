@@ -1,15 +1,20 @@
+module;
+
+#include <entt/entt.hpp>
+
 export module Misaka.Core.Entity.MisakaEntity;
 
 import <memory>;
-import <entt/entt.hpp>;
 import Misaka.Core.Entity.IEntity;
+import Misaka.Core.Utils.Registry;
 
 namespace Misaka::Core::Entity {
 
 export class MisakaEntity : public IEntity {
 public:
     MisakaEntity() = default;
-    MisakaEntity(entt::entity entity, std::shared_ptr<entt::registry> registry) : m_Entity(entity), m_Registry(registry) {}
+    MisakaEntity(entt::entity entity, std::shared_ptr<Utils::Registry> registry) : m_Entity(entity), m_Registry(registry) {
+    }
     MisakaEntity(const MisakaEntity& other) = default;
     virtual ~MisakaEntity()                 = default;
 
@@ -37,12 +42,22 @@ public:
         m_Registry->remove<T>(m_Entity);
     }
 
-    operator bool() const { return m_Entity != entt::null; }
-    operator entt::entity() const { return m_Entity; }
+    operator bool() const {
+        return m_Entity != entt::null;
+    }
+    operator entt::entity() const {
+        return m_Entity;
+    }
+    bool operator==(const MisakaEntity& other) const {
+        return m_Entity == other.m_Entity && m_Registry == other.m_Registry;
+    }
+    bool operator!=(const MisakaEntity& other) const {
+        return !(*this == other);
+    }
 
 protected:
-    entt::entity                    m_Entity   = entt::null;
-    std::shared_ptr<entt::registry> m_Registry = nullptr;
+    entt::entity                     m_Entity   = entt::null;
+    std::shared_ptr<Utils::Registry> m_Registry = nullptr;
 };
 
 } // namespace Misaka::Core::Entity

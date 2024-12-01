@@ -9,6 +9,7 @@ module;
 export module Misaka.Core.GameModule.AssetUpLoadSystem;
 
 import Misaka.Core.GameModule.Interface.IExcuteSystem;
+import Misaka.Core.CoreConfig;
 import Misaka.Core.Context.Context;
 import Misaka.Core.Component.MeshComponent;
 import Misaka.Core.Component.RenderComponent;
@@ -19,7 +20,6 @@ import Misaka.Core.Renderer.VertexLayout;
 import Misaka.Core.SingletonManager;
 import Misaka.Core.Manager.MeshManager;
 import Misaka.Core.Manager.ShaderManager;
-import Misaka.Core.Utils.Registry;
 
 namespace Misaka::Core::GameModule {
 
@@ -27,12 +27,16 @@ export class AssetUpLoadSystem : public IExcuteSystem {
 public:
     virtual ~AssetUpLoadSystem() = default;
     virtual void Excute() override {
-        auto registry = SingletonManager::GetInstance<Utils::Registry>();
+        auto registry = SingletonManager::GetInstance<entt::registry>();
 
         for (auto entity : registry->view<Component::MeshComponent>()) {
             Entity::MisakaEntity misakaEntity = Entity::MisakaEntity(entity, registry);
 
-            auto &meshComponent   = misakaEntity.GetComponent<Component::MeshComponent>();
+            auto &meshComponent = misakaEntity.GetComponent<Component::MeshComponent>();
+            if (meshComponent.dirty == false) {
+                continue;
+            }
+
             auto &renderComponent = misakaEntity.GetComponent<Component::RenderComponent>();
 
             auto layout = bgfx::VertexLayout();
@@ -56,8 +60,6 @@ public:
             }
 
             meshComponent.dirty = false;
-
-            misakaEntity.RemoveComponent<Component::MeshComponent>();
         }
     }
 };

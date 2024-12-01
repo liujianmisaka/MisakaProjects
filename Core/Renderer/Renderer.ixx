@@ -13,7 +13,6 @@ import Misaka.Core.Renderer.IndexBuffer;
 import Misaka.Core.Renderer.VertexBuffer;
 import Misaka.Core.Renderer.VertexLayout;
 import Misaka.Core.Renderer.Shader;
-import Misaka.Core.Component.WindowDataComponent;
 
 namespace Misaka::Core::Renderer {
 

@@ -13,7 +13,7 @@ import <vector>;
 import <fstream>;
 import <sstream>;
 import <iostream>;
-import Misaka.Core.Component.WindowDataComponent;
+import Misaka.Core.CoreConfig;
 import Misaka.Core.GameModule.Interface.IInitSystem;
 import Misaka.Core.Renderer.Renderer;
 
@@ -29,21 +29,19 @@ public:
             return;
         }
 
-        auto       &glfwWindowComponent = Component::WindowDataComponent::Instance();
-        GLFWwindow *window =
-            glfwCreateWindow(glfwWindowComponent.width, glfwWindowComponent.height, glfwWindowComponent.title, nullptr, nullptr);
+        GLFWwindow *window = glfwCreateWindow(CoreConfig::windowWidth, CoreConfig::windowHeight, CoreConfig::windowTitle, nullptr, nullptr);
         if (!window) {
             std::cerr << "Failed to create GLFW window" << std::endl;
             return;
         }
 
-        glfwWindowComponent.window = window;
+        CoreConfig::window = window;
 
         glfwMakeContextCurrent(window);
         glfwSetFramebufferSizeCallback(window, [](GLFWwindow *window, int width, int height) {
             Renderer::Renderer::OnWindowResize(width, height);
-            Component::WindowDataComponent::Instance().width  = width;
-            Component::WindowDataComponent::Instance().height = height;
+            CoreConfig::windowWidth  = width;
+            CoreConfig::windowHeight = height;
         });
 
         if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {

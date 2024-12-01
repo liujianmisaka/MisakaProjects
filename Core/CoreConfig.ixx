@@ -3,7 +3,7 @@ module;
 #include <glm/glm.hpp>
 #include <glm/ext/matrix_transform.hpp>
 #include <glm/ext/matrix_clip_space.hpp>
-#include <bgfx/bgfx.h>
+#include <GLFW/glfw3.h>
 
 export module Misaka.Core.CoreConfig;
 
@@ -13,9 +13,9 @@ import <string>;
 export namespace Misaka::Core::CoreConfig {
 
 // 一些全局配置
-std::filesystem::path AssetRoot  = "../Assets";
-std::filesystem::path ObjectRoot = AssetRoot / "Objects";
-std::filesystem::path ShaderRoot = AssetRoot / "Shaders";
+std::filesystem::path AssetRoot   = "../Assets";
+std::filesystem::path ObjectRoot  = AssetRoot / "Objects";
+std::filesystem::path ShaderRoot  = AssetRoot / "Shaders";
 std::filesystem::path TextureRoot = AssetRoot / "Textures";
 
 glm::vec3 cameraPos    = glm::vec3(0.0f, 0.0f, 5.0f); // 摄像机位置
@@ -28,5 +28,10 @@ float     aspectRatio = 1.0f;                // 屏幕宽高比
 float     nearPlane   = 0.1f;                // 近裁剪面
 float     farPlane    = 100.0f;              // 远裁剪面
 glm::mat4 projection  = glm::perspective(fov, aspectRatio, nearPlane, farPlane);
+
+GLFWwindow* window       = nullptr;
+int         windowWidth  = 1600;
+int         windowHeight = 900;
+const char* windowTitle  = "Misaka Engine";
 
 } // namespace Misaka::Core::CoreConfig

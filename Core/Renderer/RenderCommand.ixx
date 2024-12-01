@@ -9,7 +9,7 @@ module;
 export module Misaka.Core.Renderer.RenderCommand;
 
 import <iostream>;
-import Misaka.Core.Component.WindowDataComponent;
+import Misaka.Core.CoreConfig;
 import Misaka.Core.Renderer.IndexBuffer;
 import Misaka.Core.Renderer.VertexBuffer;
 import Misaka.Core.Renderer.VertexLayout;
@@ -20,15 +20,13 @@ namespace Misaka::Core::Renderer {
 export class RenderCommand {
 public:
     static void Init() {
-        auto& glfwWindowComponent = Component::WindowDataComponent::Instance();
-
         bgfx::Init init;
         init.type              = bgfx::RendererType::OpenGL;
         init.vendorId          = BGFX_PCI_ID_NVIDIA;
-        init.platformData.nwh  = glfwGetWin32Window(glfwWindowComponent.window);
+        init.platformData.nwh  = glfwGetWin32Window(CoreConfig::window);
         init.platformData.ndt  = nullptr;
-        init.resolution.width  = glfwWindowComponent.width;
-        init.resolution.height = glfwWindowComponent.height;
+        init.resolution.width  = CoreConfig::windowWidth;
+        init.resolution.height = CoreConfig::windowHeight;
         init.resolution.reset  = BGFX_RESET_VSYNC;
 
         if (!bgfx::init(init)) {
@@ -37,7 +35,7 @@ public:
         }
 
         bgfx::setViewClear(0, BGFX_CLEAR_COLOR | BGFX_CLEAR_DEPTH, 0x6495EDFF, 1.0f, 0);
-        bgfx::setViewRect(0, 0, 0, glfwWindowComponent.width, glfwWindowComponent.height);
+        bgfx::setViewRect(0, 0, 0, CoreConfig::windowWidth, CoreConfig::windowHeight);
         bgfx::setState(BGFX_STATE_DEFAULT);
         bgfx::setState(BGFX_STATE_WRITE_Z | BGFX_STATE_DEPTH_TEST_LESS);
     }

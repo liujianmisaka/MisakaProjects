@@ -13,7 +13,7 @@ module;
 export module Misaka.Core.GameModule.ImGuiInitSystem;
 
 import <iostream>;
-import Misaka.Core.Component.WindowDataComponent;
+import Misaka.Core.CoreConfig;
 import Misaka.Core.GameModule.Interface.IInitSystem;
 
 namespace Misaka::Core::GameModule {
@@ -23,9 +23,7 @@ public:
     virtual ~ImGuiInitSystem() = default;
 
     virtual void Initialize() override {
-        auto& glfwWindowComponent = Component::WindowDataComponent::Instance();
-
-        if (glfwWindowComponent.window == nullptr) {
+        if (CoreConfig::window == nullptr) {
             throw std::runtime_error("GLFW window is nullptr, call RenderInitSystem first.");
         }
 
@@ -41,7 +39,7 @@ public:
         ImGui::StyleColorsDark();
 
         ImGui_Implbgfx_Init(255);
-        ImGui_ImplGlfw_InitForOpenGL(glfwWindowComponent.window, true);
+        ImGui_ImplGlfw_InitForOpenGL(CoreConfig::window, true);
     }
 };
 

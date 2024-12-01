@@ -17,11 +17,9 @@ module;
 export module Misaka.Core.UI.MainWindow;
 
 import <iostream>;
-import Misaka.Core.Component.WindowDataComponent;
-import Misaka.Core.Component.FrameBufferComponent;
-import Misaka.Core.CoreConfig;
 import Misaka.Core.SingletonManager;
-import Misaka.Core.Utils.Registry;
+import Misaka.Core.CoreConfig;
+import Misaka.Core.Manager.FrameBufferManager;
 import Misaka.Core.Entity.MisakaEntity;
 import Misaka.Core.Component.TagComponent;
 import Misaka.Core.Component.TransformComponent;
@@ -120,7 +118,8 @@ public:
         ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2{0, 0});
         ImGui::Begin("Viewport");
 
-        auto& frameBufferComponent = Component::FrameBufferComponent::Instance();
+        auto viewportFrameBuffer =
+            SingletonManager::GetInstance<Manager::FrameBufferManager>()->GetFrameBuffer(Manager::FrameBufferType::VIEWPORT);
 
         // 获取视口尺寸
         ImVec2 viewportPanelSize   = ImGui::GetContentRegionAvail();
@@ -129,13 +128,11 @@ public:
         CoreConfig::aspectRatio = viewportAspectRatio;
         CoreConfig::projection  = glm::perspective(CoreConfig::fov, CoreConfig::aspectRatio, CoreConfig::nearPlane, CoreConfig::farPlane);
 
-        // frameBufferComponent.viewportFrameBuffer->SetViewportSize(viewportPanelSize.x, viewportPanelSize.y);
-
-        ImTextureID textureID = (ImTextureID)Component::FrameBufferComponent::Instance().viewportFrameBuffer->GetTextureIndex();
+        ImTextureID textureID = (ImTextureID)viewportFrameBuffer->GetTextureIndex();
         ImGui::Image(textureID, viewportPanelSize, ImVec2{0, 1}, ImVec2{1, 0});
 
         // Right-click on blank space
-        auto registry = SingletonManager::GetInstance<Utils::Registry>();
+        auto registry = SingletonManager::GetInstance<entt::registry>();
         if (ImGui::BeginPopupContextWindow(nullptr, 1)) {
             ImGui::PushStyleColor(ImGuiCol_PopupBg, ImVec4(0.15f, 0.15f, 0.15f, 0.9f));
             ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(10, 5));
@@ -189,7 +186,7 @@ public:
     void SceneHierarchy() {
         ImGui::Begin("Scene Hierarchy");
 
-        auto registry = SingletonManager::GetInstance<Utils::Registry>();
+        auto registry = SingletonManager::GetInstance<entt::registry>();
 
         if (registry) {
             for (auto entity : registry->view<entt::entity>()) {
@@ -205,7 +202,7 @@ public:
         ImGui::End();
 
         ImGui::Begin("Properties");
-        if (m_SelectionEntity) {
+        if (m_SelectionEntity.IsValid()) {
             DrawComponents(m_SelectionEntity);
         }
         ImGui::End();
@@ -216,7 +213,7 @@ public:
 
         ImGuiTreeNodeFlags flags = (m_SelectionEntity == entity ? ImGuiTreeNodeFlags_Selected : 0) | ImGuiTreeNodeFlags_OpenOnArrow;
         // flags |= ImGuITreeNodeFlags_SpanAllAvailWidth;   // TODO: not support in this imgui version
-        const bool opened = ImGui::TreeNodeEx((void*)(uint64_t)(uint32_t)entity, flags, tag.c_str());
+        bool opened = ImGui::TreeNodeEx((void*)(uint64_t)(uint32_t)entity, flags, tag.c_str());
 
         if (ImGui::IsItemClicked()) {
             m_SelectionEntity = entity;
@@ -239,7 +236,7 @@ public:
 
         // delay delete entity
         if (entityDeleted) {
-            auto registry = SingletonManager::GetInstance<Utils::Registry>();
+            auto registry = SingletonManager::GetInstance<entt::registry>();
             registry->destroy(entity);
             if (m_SelectionEntity == entity) {
                 m_SelectionEntity = {};
@@ -327,6 +324,13 @@ public:
             DrawVec3Control("Position", component.position);
             DrawVec3Control("Rotation", component.rotation);
             DrawVec3Control("Scale", component.scale, 1.0f);
+        });
+
+        DrawComponent<Component::MeshComponent>("Mesh", entity, [](Component::MeshComponent& component) {
+            ImGui::Text("Meshes:");
+            for (auto& mesh : component.meshes) {
+                ImGui::Text(mesh.c_str());
+            }
         });
 
         // DrawComponent<CameraComponent>("Camera", entity, [](auto& component) {

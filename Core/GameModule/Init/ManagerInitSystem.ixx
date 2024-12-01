@@ -7,6 +7,8 @@ import Misaka.Core.Manager.UniformBufferManager;
 import Misaka.Core.Manager.MeshManager;
 import Misaka.Core.Manager.ShaderManager;
 import Misaka.Core.Manager.TextureManager;
+import Misaka.Core.Manager.FrameBufferManager;
+import Misaka.Core.Manager.LayerHandlerManager;
 
 namespace Misaka::Core::GameModule {
 
@@ -14,6 +16,10 @@ export class ManagerInitSystem : public IInitSystem {
 public:
     virtual void Initialize() override {
         SingletonManager::GetInstance<Manager::UniformBufferManager>()->Init();
+
+        SingletonManager::GetInstance<Manager::FrameBufferManager>()->Init();
+
+        SingletonManager::GetInstance<Manager::LayerHandlerManager>()->InitWindowLayerHandler();
 
         auto meshManager = SingletonManager::GetInstance<Manager::MeshManager>();
         meshManager->LoadStaticMesh("cube", (CoreConfig::ObjectRoot / "cube.obj").string());

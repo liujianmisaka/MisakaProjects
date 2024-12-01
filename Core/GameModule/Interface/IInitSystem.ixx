@@ -4,9 +4,9 @@ import Misaka.Core.GameModule.Interface.ISystem;
 
 namespace Misaka::Core::GameModule {
 
-export class IInitSystem {
+export class IInitSystem : public ISystem {
 public:
-    virtual ~IInitSystem() = default;
+    virtual ~IInitSystem()    = default;
     virtual void Initialize() = 0;
 };
 

@@ -17,17 +17,27 @@ public:
     static std::shared_ptr<T> GetInstance() {
         const std::type_index key = typeid(std::type_identity_t<T>);
 
-        std::scoped_lock lock(m_Mutex); // 确保线程安全
-        auto             it = m_Instances.find(key);
+        {
+            std::scoped_lock lock(m_GlobalMutex); // 确保线程安全
+            auto             it = m_Instances.find(key);
 
-        if (it == m_Instances.end()) {
-            // 如果单例尚未创建，则创建并保存
-            auto instance = std::make_shared<T>();
-            m_Instances[key] = instance;
-            return instance;
+            if (it != m_Instances.end()) {
+                return std::any_cast<std::shared_ptr<T>>(it->second);
+            }
+
+            // 先插入一个占位符
+            m_Instances[key] = std::shared_ptr<T>(nullptr);
         }
 
-        return std::any_cast<std::shared_ptr<T>>(it->second);
+        // 创建实例
+        auto instance = std::make_shared<T>();
+
+        {
+            std::scoped_lock lock(m_GlobalMutex); // 确保线程安全
+            m_Instances[key] = instance;
+        }
+
+        return instance;
     }
 
     // 销毁单例对象
@@ -35,7 +45,7 @@ public:
     static void DestroyInstance() {
         const std::type_index key = typeid(std::type_identity_t<T>);
 
-        std::scoped_lock lock(m_Mutex);
+        std::scoped_lock lock(m_GlobalMutex);
         auto             it = m_Instances.find(key);
 
         if (it != m_Instances.end()) {
@@ -47,8 +57,8 @@ private:
     SingletonManager() = delete; // 禁止实例化
 
     // 全局保存所有类型的单例对象
-    static inline std::unordered_map<std::type_index, std::any> m_Instances;
-    static inline std::mutex                                    m_Mutex;
+    static inline std::unordered_map<std::type_index, std::any> m_Instances   = {};
+    static inline std::mutex                                    m_GlobalMutex = {};
 };
 
 } // namespace Misaka::Core

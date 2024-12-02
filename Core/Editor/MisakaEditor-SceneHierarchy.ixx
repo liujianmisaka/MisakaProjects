@@ -2,188 +2,23 @@ module;
 
 #include <imgui.h>
 #include <imgui_internal.h>
-#include <bgfx/bgfx.h>
-#include <bgfx/platform.h>
-#include "imgui_impl_bgfx.h"
-#include <imgui_impl_glfw.h>
-#include <imgui_impl_opengl3.h>
-#include <GLFW/glfw3.h>
-#define GLFW_EXPOSE_NATIVE_WIN32
-#include <GLFW/glfw3native.h>
-#include <glm/glm.hpp>
-#include <glm/gtc/type_ptr.hpp> // Add this include for glm::value_ptr
 #include <entt/entt.hpp>
+#include <glm/glm.hpp>
+#include <glm/gtc/type_ptr.hpp>
 
-export module Misaka.Core.UI.MainWindow;
+export module Misaka.Core.Editor.MisakaEditor:SceneHierarchy;
 
-import <iostream>;
 import Misaka.Core.SingletonManager;
-import Misaka.Core.CoreConfig;
-import Misaka.Core.Manager.FrameBufferManager;
 import Misaka.Core.Entity.MisakaEntity;
 import Misaka.Core.Component.TagComponent;
 import Misaka.Core.Component.TransformComponent;
 import Misaka.Core.Component.MeshComponent;
 
-namespace Misaka::Core::UI {
+namespace Misaka::Core::Editor {
 
-export class MainWindow {
+class SceneHierarchy {
 public:
-    MainWindow()  = default;
-    ~MainWindow() = default;
-
-    void BeginFrame() {
-        bgfx::touch(0);
-        ImGui_Implbgfx_NewFrame();
-        ImGui_ImplGlfw_NewFrame();
-        ImGui::NewFrame();
-    }
-
-    void Draw() {
-        // Note: Switch this to true to enable dockspace
-        static bool               dockspaceOpen             = true;
-        static bool               opt_fullscreen_persistant = true;
-        bool                      opt_fullscreen            = opt_fullscreen_persistant;
-        static ImGuiDockNodeFlags dockspace_flags           = ImGuiDockNodeFlags_None;
-
-        // We are using the ImGuiWindowFlags_NoDocking flag to make the parent window not dockable into,
-        // because it would be confusing to have two docking targets within each others.
-        ImGuiWindowFlags window_flags = ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoDocking;
-        if (opt_fullscreen) {
-            ImGuiViewport* viewport = ImGui::GetMainViewport();
-            ImGui::SetNextWindowPos(viewport->Pos);
-            ImGui::SetNextWindowSize(viewport->Size);
-            ImGui::SetNextWindowViewport(viewport->ID);
-            ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
-            ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
-            window_flags |= ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove;
-            window_flags |= ImGuiWindowFlags_NoBringToFrontOnFocus | ImGuiWindowFlags_NoNavFocus;
-        }
-
-        // When using ImGuiDockNodeFlags_PassthruCentralNode, DockSpace() will render our background and handle the pass-thru hole, so we
-        // ask Begin() to not render a background.
-        if (dockspace_flags) // TODO: ImGuiDockNodeFlags_PassthruCentralNode
-            window_flags |= ImGuiWindowFlags_NoBackground;
-
-        // Important: note that we proceed even if Begin() returns false (aka window is collapsed).
-        // This is because we want to keep our DockSpace() active. If a DockSpace() is inactive,
-        // all active windows docked into it will lose their parent and become undocked.
-        // We cannot preserve the docking relationship between an active window and an inactive docking, otherwise
-        // any change of dockspace/settings would lead to windows being stuck in limbo and never being visible.
-        ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
-        ImGui::Begin("DockSpace Demo", &dockspaceOpen, window_flags);
-        ImGui::PopStyleVar();
-
-        if (opt_fullscreen) ImGui::PopStyleVar(2);
-
-        // DockSpace
-        ImGuiIO&    io          = ImGui::GetIO();
-        ImGuiStyle& style       = ImGui::GetStyle();
-        float       minWinSizeX = style.WindowMinSize.x;
-        style.WindowMinSize.x   = 370.0f;
-        if (io.ConfigFlags & ImGuiConfigFlags_DockingEnable) {
-            ImGuiID dockspace_id = ImGui::GetID("MyDockSpace");
-            ImGui::DockSpace(dockspace_id, ImVec2(0.0f, 0.0f), dockspace_flags);
-        }
-
-        style.WindowMinSize.x = minWinSizeX;
-
-        if (ImGui::BeginMenuBar()) {
-            if (ImGui::BeginMenu("File")) {
-                // Disabling fullscreen would allow the window to be moved to the front of other windows,
-                // which we can't undo at the moment without finer window depth/z control.
-                // ImGui::MenuItem("Fullscreen", NULL, &opt_fullscreen_persistant);1
-                ImGui::MenuItem("New", "Ctrl+N");
-                ImGui::MenuItem("Open...", "Ctrl+O");
-                ImGui::MenuItem("Save As...", "Ctrl+Shift+S");
-                ImGui::MenuItem("Exit");
-                ImGui::EndMenu();
-            }
-
-            ImGui::EndMenuBar();
-        }
-
-        SceneHierarchy();
-
-        ImGui::Begin("Settings");
-
-        // Set MVP Matrix
-        auto fov = glm::degrees(CoreConfig::fov);
-        ImGui::DragFloat("FOV", &fov, 0.1f, 0.0f, 180.0f);
-        CoreConfig::fov        = glm::radians(fov);
-        CoreConfig::projection = glm::perspective(CoreConfig::fov, CoreConfig::aspectRatio, CoreConfig::nearPlane, CoreConfig::farPlane);
-
-        ImGui::End();
-
-        ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2{0, 0});
-        ImGui::Begin("Viewport");
-
-        auto viewportFrameBuffer =
-            SingletonManager::GetInstance<Manager::FrameBufferManager>()->GetFrameBuffer(Manager::FrameBufferType::VIEWPORT);
-
-        // 获取视口尺寸
-        ImVec2 viewportPanelSize   = ImGui::GetContentRegionAvail();
-        float  viewportAspectRatio = viewportPanelSize.x / viewportPanelSize.y;
-
-        CoreConfig::aspectRatio = viewportAspectRatio;
-        CoreConfig::projection  = glm::perspective(CoreConfig::fov, CoreConfig::aspectRatio, CoreConfig::nearPlane, CoreConfig::farPlane);
-
-        ImTextureID textureID = (ImTextureID)viewportFrameBuffer->GetTextureIndex();
-        ImGui::Image(textureID, viewportPanelSize, ImVec2{0, 1}, ImVec2{1, 0});
-
-        // Right-click on blank space
-        auto registry = SingletonManager::GetInstance<entt::registry>();
-        if (ImGui::BeginPopupContextWindow(nullptr, 1)) {
-            ImGui::PushStyleColor(ImGuiCol_PopupBg, ImVec4(0.15f, 0.15f, 0.15f, 0.9f));
-            ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(10, 5));
-
-            if (ImGui::MenuItem("  Create Empty Entity")) {
-                auto                 entity = registry->create();
-                Entity::MisakaEntity misakaEntity(entity, registry);
-                misakaEntity.AddComponent<Component::TagComponent>("MisakaEntity");
-                misakaEntity.AddComponent<Component::TransformComponent>();
-            }
-            if (ImGui::IsItemHovered()) {
-                ImGui::SetTooltip("Create an empty entity with no components.");
-            }
-
-            ImGui::Separator();
-
-            if (ImGui::MenuItem("  Create Cube Entity")) {
-                auto                 entity = registry->create();
-                Entity::MisakaEntity misakaEntity(entity, registry);
-                misakaEntity.AddComponent<Component::TagComponent>("cube");
-                misakaEntity.AddComponent<Component::TransformComponent>();
-                misakaEntity.AddComponent<Component::MeshComponent>().AddMesh("cube");
-            }
-            if (ImGui::IsItemHovered()) {
-                ImGui::SetTooltip("Create a cube entity with a mesh component.");
-            }
-
-            ImGui::PopStyleVar();
-            ImGui::PopStyleColor();
-            ImGui::EndPopup();
-        }
-
-        ImGui::End();
-        ImGui::PopStyleVar();
-
-        ImGui::End();
-    }
-
-    void EndFrame() {
-        ImGui::Render();
-        ImGui_Implbgfx_RenderDrawLists(ImGui::GetDrawData());
-    }
-
-    void Shutdown() {
-        ImGui_ImplGlfw_Shutdown();
-        ImGui_Implbgfx_Shutdown();
-        ImGui::DestroyContext();
-        bgfx::shutdown();
-    }
-
-    void SceneHierarchy() {
+    static void Render() {
         ImGui::Begin("Scene Hierarchy");
 
         auto registry = SingletonManager::GetInstance<entt::registry>();
@@ -195,28 +30,29 @@ public:
             }
 
             if (ImGui::IsMouseDown(0) && ImGui::IsWindowHovered()) {
-                m_SelectionEntity = {};
+                SelectionEntity = {};
             }
         }
 
         ImGui::End();
 
         ImGui::Begin("Properties");
-        if (m_SelectionEntity.IsValid()) {
-            DrawComponents(m_SelectionEntity);
+        if (SelectionEntity.IsValid()) {
+            DrawComponents(SelectionEntity);
         }
         ImGui::End();
     }
 
-    void DrawEntityNode(Entity::MisakaEntity entity) {
+private:
+    static void DrawEntityNode(Entity::MisakaEntity entity) {
         const auto& tag = entity.GetComponent<Component::TagComponent>().Tag;
 
-        ImGuiTreeNodeFlags flags = (m_SelectionEntity == entity ? ImGuiTreeNodeFlags_Selected : 0) | ImGuiTreeNodeFlags_OpenOnArrow;
+        ImGuiTreeNodeFlags flags = (SelectionEntity == entity ? ImGuiTreeNodeFlags_Selected : 0) | ImGuiTreeNodeFlags_OpenOnArrow;
         // flags |= ImGuITreeNodeFlags_SpanAllAvailWidth;   // TODO: not support in this imgui version
         bool opened = ImGui::TreeNodeEx((void*)(uint64_t)(uint32_t)entity, flags, tag.c_str());
 
         if (ImGui::IsItemClicked()) {
-            m_SelectionEntity = entity;
+            SelectionEntity = entity;
         }
 
         bool entityDeleted = false;
@@ -238,13 +74,13 @@ public:
         if (entityDeleted) {
             auto registry = SingletonManager::GetInstance<entt::registry>();
             registry->destroy(entity);
-            if (m_SelectionEntity == entity) {
-                m_SelectionEntity = {};
+            if (SelectionEntity == entity) {
+                SelectionEntity = {};
             }
         }
     }
 
-    void DrawComponents(Entity::MisakaEntity entity) {
+    static void DrawComponents(Entity::MisakaEntity entity) {
         if (entity.HasComponent<Component::TagComponent>()) {
             auto& tag = entity.GetComponent<Component::TagComponent>().Tag;
 
@@ -261,44 +97,44 @@ public:
         if (ImGui::Button("Add Component")) ImGui::OpenPopup("AddComponent");
 
         // if (ImGui::BeginPopup("AddComponent")) {
-        //     if (!m_SelectionEntity.HasComponent<CameraComponent>()) {
+        //     if (!SelectionEntity.HasComponent<CameraComponent>()) {
         //         if (ImGui::MenuItem("Camera")) {
-        //             m_SelectionEntity.AddComponent<CameraComponent>();
+        //             SelectionEntity.AddComponent<CameraComponent>();
         //             ImGui::CloseCurrentPopup();
         //         }
         //     }
 
-        //    if (!m_SelectionEntity.HasComponent<SpriteRendererComponent>()) {
+        //    if (!SelectionEntity.HasComponent<SpriteRendererComponent>()) {
         //        if (ImGui::MenuItem("Sprite Render")) {
-        //            m_SelectionEntity.AddComponent<SpriteRendererComponent>();
+        //            SelectionEntity.AddComponent<SpriteRendererComponent>();
         //            ImGui::CloseCurrentPopup();
         //        }
         //    }
 
-        //    if (!m_SelectionEntity.HasComponent<CircleRendererComponent>()) {
+        //    if (!SelectionEntity.HasComponent<CircleRendererComponent>()) {
         //        if (ImGui::MenuItem("Circle Renderer")) {
-        //            m_SelectionEntity.AddComponent<CircleRendererComponent>();
+        //            SelectionEntity.AddComponent<CircleRendererComponent>();
         //            ImGui::CloseCurrentPopup();
         //        }
         //    }
 
-        //    if (!m_SelectionEntity.HasComponent<Rigidbody2DComponent>()) {
+        //    if (!SelectionEntity.HasComponent<Rigidbody2DComponent>()) {
         //        if (ImGui::MenuItem("Rigidbody 2D")) {
-        //            m_SelectionEntity.AddComponent<Rigidbody2DComponent>();
+        //            SelectionEntity.AddComponent<Rigidbody2DComponent>();
         //            ImGui::CloseCurrentPopup();
         //        }
         //    }
 
-        //    if (!m_SelectionEntity.HasComponent<BoxCollider2DComponent>()) {
+        //    if (!SelectionEntity.HasComponent<BoxCollider2DComponent>()) {
         //        if (ImGui::MenuItem("BoxCollider 2D")) {
-        //            m_SelectionEntity.AddComponent<BoxCollider2DComponent>();
+        //            SelectionEntity.AddComponent<BoxCollider2DComponent>();
         //            ImGui::CloseCurrentPopup();
         //        }
         //    }
 
-        //    if (!m_SelectionEntity.HasComponent<CircleCollider2DComponent>()) {
+        //    if (!SelectionEntity.HasComponent<CircleCollider2DComponent>()) {
         //        if (ImGui::MenuItem("CircleCollider 2D")) {
-        //            m_SelectionEntity.AddComponent<CircleCollider2DComponent>();
+        //            SelectionEntity.AddComponent<CircleCollider2DComponent>();
         //            ImGui::CloseCurrentPopup();
         //        }
         //    }
@@ -539,11 +375,9 @@ public:
     }
 
 private:
-    bool   show_demo_window    = true;
-    bool   show_another_window = false;
-    ImVec4 clear_color         = ImVec4(0.45f, 0.55f, 0.60f, 1.00f);
-
-    Entity::MisakaEntity m_SelectionEntity;
+    static Entity::MisakaEntity SelectionEntity;
 };
 
-} // namespace Misaka::Core::UI
+Entity::MisakaEntity SceneHierarchy::SelectionEntity = {};
+
+} // namespace Misaka::Core::Editor

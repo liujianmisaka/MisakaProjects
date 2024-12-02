@@ -1,12 +1,12 @@
-export module Misaka.Core.Layer.GameWindowLayerHandler;
+export module Misaka.Core.Layer.MisakaGameLayerHandler;
 
 import Misaka.Core.Layer.ILayerHandler;
 
 namespace Misaka::Core::Layer {
 
-export class GameWindowLayerHandler : public WindowLayerHandler {
+export class MisakaGameLayerHandler : public WindowLayerHandler {
 public:
-    virtual ~GameWindowLayerHandler() = default;
+    virtual ~MisakaGameLayerHandler() = default;
 
     virtual void OnWindowLayerHandler() {
     }

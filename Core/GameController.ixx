@@ -10,7 +10,7 @@ import Misaka.Core.SingletonManager;
 import Misaka.Core.CoreConfig;
 import Misaka.Core.GameModule.GameModule;
 import Misaka.Core.GameModule.RenderInitSystem;
-import Misaka.Core.GameModule.ImGuiInitSystem;
+import Misaka.Core.GameModule.EditorInitSystem;
 import Misaka.Core.GameModule.ManagerInitSystem;
 import Misaka.Core.GameModule.AssetUpLoadSystem;
 import Misaka.Core.GameModule.GameRenderSystem;
@@ -35,7 +35,7 @@ protected:
     void Init() {
         auto gameModule = SingletonManager::GetInstance<GameModule::GameModule>();
         gameModule->AddSystem<GameModule::RenderInitSystem>();
-        gameModule->AddSystem<GameModule::ImGuiInitSystem>();
+        gameModule->AddSystem<GameModule::EditorInitSystem>();
         gameModule->AddSystem<GameModule::ManagerInitSystem>();
         gameModule->AddSystem<GameModule::AssetUpLoadSystem>();
         gameModule->AddSystem<GameModule::GameRenderSystem>();

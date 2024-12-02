@@ -96,63 +96,18 @@ private:
 
         if (ImGui::Button("Add Component")) ImGui::OpenPopup("AddComponent");
 
-        // if (ImGui::BeginPopup("AddComponent")) {
-        //     if (!SelectionEntity.HasComponent<CameraComponent>()) {
-        //         if (ImGui::MenuItem("Camera")) {
-        //             SelectionEntity.AddComponent<CameraComponent>();
-        //             ImGui::CloseCurrentPopup();
-        //         }
-        //     }
+        if (ImGui::BeginPopup("AddComponent")) {
+            if (!SelectionEntity.HasComponent<Component::MeshComponent>()) {
+                if (ImGui::MenuItem("Mesh")) {
+                    SelectionEntity.AddComponent<Component::MeshComponent>();
+                    ImGui::CloseCurrentPopup();
+                }
+            }
 
-        //    if (!SelectionEntity.HasComponent<SpriteRendererComponent>()) {
-        //        if (ImGui::MenuItem("Sprite Render")) {
-        //            SelectionEntity.AddComponent<SpriteRendererComponent>();
-        //            ImGui::CloseCurrentPopup();
-        //        }
-        //    }
+            ImGui::EndPopup();
+        }
 
-        //    if (!SelectionEntity.HasComponent<CircleRendererComponent>()) {
-        //        if (ImGui::MenuItem("Circle Renderer")) {
-        //            SelectionEntity.AddComponent<CircleRendererComponent>();
-        //            ImGui::CloseCurrentPopup();
-        //        }
-        //    }
-
-        //    if (!SelectionEntity.HasComponent<Rigidbody2DComponent>()) {
-        //        if (ImGui::MenuItem("Rigidbody 2D")) {
-        //            SelectionEntity.AddComponent<Rigidbody2DComponent>();
-        //            ImGui::CloseCurrentPopup();
-        //        }
-        //    }
-
-        //    if (!SelectionEntity.HasComponent<BoxCollider2DComponent>()) {
-        //        if (ImGui::MenuItem("BoxCollider 2D")) {
-        //            SelectionEntity.AddComponent<BoxCollider2DComponent>();
-        //            ImGui::CloseCurrentPopup();
-        //        }
-        //    }
-
-        //    if (!SelectionEntity.HasComponent<CircleCollider2DComponent>()) {
-        //        if (ImGui::MenuItem("CircleCollider 2D")) {
-        //            SelectionEntity.AddComponent<CircleCollider2DComponent>();
-        //            ImGui::CloseCurrentPopup();
-        //        }
-        //    }
-
-        //    ImGui::EndPopup();
-        //}
-
-        // ImGui::PopItemWidth();
-
-        // DrawComponent<TransformComponent>("Transform", entity, [](auto& component) {
-        //     // WHY: Where set Camera move style?
-        //     // NOTE: Camera move style is set in Render2D::BeginScene()
-        //     DrawVec3Control("Translation", component.Translation);
-        //     glm::vec3 rotation = glm::degrees(component.Rotation);
-        //     DrawVec3Control("Rotation", rotation);
-        //     component.Rotation = glm::radians(rotation);
-        //     DrawVec3Control("Scale", component.Scale, 1.0f);
-        // });
+        ImGui::PopItemWidth();
 
         DrawComponent<Component::TransformComponent>("Transform", entity, [](Component::TransformComponent& component) {
             // WHY: Where set Camera move style?
@@ -168,115 +123,6 @@ private:
                 ImGui::Text(mesh.c_str());
             }
         });
-
-        // DrawComponent<CameraComponent>("Camera", entity, [](auto& component) {
-        //     auto& [camera, primary, fixedAspectRatio] = component;
-
-        //    ImGui::Checkbox("Primary", &primary);
-
-        //    const char* projectionTypeStrings[]     = {"Perspective", "Orthographic"};
-        //    const char* currentProjectionTypeString = projectionTypeStrings[static_cast<int>(camera.GetProjectionType())];
-        //    if (ImGui::BeginCombo("Projection", currentProjectionTypeString)) {
-        //        for (int i = 0; i < 2; i++) {
-        //            const bool isSelected = currentProjectionTypeString == projectionTypeStrings[i];
-        //            if (ImGui::Selectable(projectionTypeStrings[i], isSelected)) {
-        //                currentProjectionTypeString = projectionTypeStrings[i];
-        //                camera.SetProjectionType(static_cast<SceneCamera::ProjectionType>(i));
-        //            }
-
-        //            if (isSelected) ImGui::SetItemDefaultFocus();
-        //        }
-        //        ImGui::EndCombo();
-        //    }
-
-        //    if (camera.GetProjectionType() == SceneCamera::ProjectionType::Perspective) {
-        //        float perspectiveVerticalFov = glm::degrees(camera.GetPerspectiveVerticalFOV());
-        //        if (ImGui::DragFloat("Vertical FOV", &perspectiveVerticalFov))
-        //            camera.SetPerspectiveVerticalFOV(glm::radians(perspectiveVerticalFov));
-
-        //        float perspectiveNear = camera.GetPerspectiveNearClip();
-        //        if (ImGui::DragFloat("Near", &perspectiveNear)) camera.SetPerspectiveNearClip(perspectiveNear);
-
-        //        float perspectiveFar = camera.GetPerspectiveFarClip();
-        //        if (ImGui::DragFloat("Far", &perspectiveFar)) camera.SetPerspectiveFarClip(perspectiveFar);
-        //    }
-
-        //    if (camera.GetProjectionType() == SceneCamera::ProjectionType::Orthographic) {
-        //        float orthoSize = camera.GetOrthographicSize();
-        //        if (ImGui::DragFloat("Size", &orthoSize)) camera.SetOrthographicSize(orthoSize);
-
-        //        float orthoNear = camera.GetOrthographicNearClip();
-        //        if (ImGui::DragFloat("Near", &orthoNear)) camera.SetOrthographicNearClip(orthoNear);
-
-        //        float orthoFar = camera.GetOrthographicFarClip();
-        //        if (ImGui::DragFloat("Far", &orthoFar)) camera.SetOrthographicFarClip(orthoFar);
-
-        //        ImGui::Checkbox("FixedAspectRatio", &fixedAspectRatio);
-        //    }
-        //});
-
-        // DrawComponent<SpriteRendererComponent>("Sprite Render", entity, [](auto& component) {
-        //     ImGui::ColorEdit4("Color", glm::value_ptr(component.Color));
-
-        //    ImGui::Button("Texture", ImVec2(100.0f, 0.0f));
-        //    if (ImGui::BeginDragDropTarget()) {
-        //        if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("CONTENT_BROWSER_ITEM")) {
-        //            const wchar_t*        path        = (const wchar_t*)payload->Data;
-        //            std::filesystem::path texturePath = std::filesystem::path(g_AssetPath) / path;
-        //            Ref<Texture2D>        texture     = Texture2D::Create(texturePath.string());
-        //            if (texture->IsLoaded())
-        //                component.Texture = texture;
-        //            else
-        //                HZ_WARN("Could not load texture {0}", texturePath.filename().string());
-        //        }
-        //        ImGui::EndDragDropTarget();
-        //    }
-
-        //    ImGui::DragFloat("Tiling Factor", &component.TilingFactor, 0.1f, 0.0f, 100.0f);
-        //});
-
-        // DrawComponent<CircleRendererComponent>("Circle Renderer", entity, [](auto& component) {
-        //     ImGui::ColorEdit4("Color", glm::value_ptr(component.Color));
-        //     ImGui::DragFloat("Thickness", &component.Thickness, 0.025f, 0.0f, 1.0f);
-        //     ImGui::DragFloat("Fade", &component.Fade, 0.00025f, 0.0f, 1.0f);
-        // });
-
-        // DrawComponent<Rigidbody2DComponent>("Rigidbody 2D", entity, [](auto& component) {
-        //     const char* bodyTypeStrings[]     = {"Static", "Dynamic", "Kinematic"};
-        //     const char* currentBodyTypeString = bodyTypeStrings[static_cast<int>(component.Type)];
-        //     if (ImGui::BeginCombo("Body Type", currentBodyTypeString)) {
-        //         for (int i = 0; i < 2; i++) {
-        //             const bool isSelected = currentBodyTypeString == bodyTypeStrings[i];
-        //             if (ImGui::Selectable(bodyTypeStrings[i], isSelected)) {
-        //                 currentBodyTypeString = bodyTypeStrings[i];
-        //                 component.Type        = static_cast<Rigidbody2DComponent::BodyType>(i);
-        //             }
-
-        //            if (isSelected) ImGui::SetItemDefaultFocus();
-        //        }
-        //        ImGui::EndCombo();
-        //    }
-
-        //    ImGui::Checkbox("Fixed Rotation", &component.FixedRotation);
-        //});
-
-        // DrawComponent<BoxCollider2DComponent>("Box Collider 2D", entity, [](auto& component) {
-        //     ImGui::DragFloat2("Offset", glm::value_ptr(component.Offset));
-        //     ImGui::DragFloat2("Size", glm::value_ptr(component.Offset));
-        //     ImGui::DragFloat("Density", &component.Density, 0.01f, 0.0f, 1.0f);
-        //     ImGui::DragFloat("Friction", &component.Friction, 0.01f, 0.0f, 1.0f);
-        //     ImGui::DragFloat("Restitution", &component.Restitution, 0.01f, 0.0f, 1.0f);
-        //     ImGui::DragFloat("Restitution Threshold", &component.RestitutionThreshold, 0.01f, 0.0f);
-        // });
-
-        // DrawComponent<CircleCollider2DComponent>("Circle Collider 2D", entity, [](auto& component) {
-        //     ImGui::DragFloat2("Offset", glm::value_ptr(component.Offset));
-        //     ImGui::DragFloat("Radius", &component.Radius);
-        //     ImGui::DragFloat("Density", &component.Density, 0.01f, 0.0f, 1.0f);
-        //     ImGui::DragFloat("Friction", &component.Friction, 0.01f, 0.0f, 1.0f);
-        //     ImGui::DragFloat("Restitution", &component.Restitution, 0.01f, 0.0f, 1.0f);
-        //     ImGui::DragFloat("Restitution Threshold", &component.RestitutionThreshold, 0.01f, 0.0f);
-        // });
     }
 
     template <typename T, typename UIFunction>

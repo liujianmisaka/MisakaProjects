@@ -3,11 +3,10 @@ module;
 #include <imgui.h>
 #include <imgui_internal.h>
 #include <entt/entt.hpp>
-#include <glm/glm.hpp>
-#include <glm/gtc/type_ptr.hpp>
 
 export module Misaka.Core.Editor.MisakaEditor:SceneHierarchy;
 
+import glm;
 import Misaka.Core.SingletonManager;
 import Misaka.Core.Entity.MisakaEntity;
 import Misaka.Core.Component.TagComponent;

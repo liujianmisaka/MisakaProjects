@@ -1,11 +1,6 @@
-module;
-
-#include <glm/glm.hpp>
-#include <glm/ext/matrix_transform.hpp>
-#include <glm/ext/matrix_clip_space.hpp>
-
 export module Misaka.Core.Component.CameraComponent;
 
+import glm;
 import Misaka.Core.Component.IComponent;
 
 namespace Misaka::Core::Component {

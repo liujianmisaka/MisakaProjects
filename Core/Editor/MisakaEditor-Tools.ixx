@@ -1,11 +1,10 @@
 module;
 
 #include <imgui.h>
-#include <glm/glm.hpp>
-#include <glm/gtc/type_ptr.hpp>
 
 export module Misaka.Core.Editor.MisakaEditor:Tools;
 
+import glm;
 import Misaka.Core.CoreConfig;
 
 namespace Misaka::Core::Editor {

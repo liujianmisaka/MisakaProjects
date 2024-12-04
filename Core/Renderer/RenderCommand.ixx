@@ -4,11 +4,11 @@ module;
 #include <GLFW/glfw3.h>
 #define GLFW_EXPOSE_NATIVE_WIN32
 #include <GLFW/glfw3native.h>
-#include <glm/glm.hpp>
 
 export module Misaka.Core.Renderer.RenderCommand;
 
 import <iostream>;
+import glm;
 import Misaka.Core.CoreConfig;
 import Misaka.Core.Renderer.IndexBuffer;
 import Misaka.Core.Renderer.VertexBuffer;

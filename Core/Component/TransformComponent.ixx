@@ -1,10 +1,6 @@
-module;
-
-#include <glm/glm.hpp>
-#include <glm/ext/matrix_transform.hpp>
-
 export module Misaka.Core.Component.TransformComponent;
 
+import glm;
 import Misaka.Core.Component.IComponent;
 
 namespace Misaka::Core::Component {

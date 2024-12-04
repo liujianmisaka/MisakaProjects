@@ -4,11 +4,10 @@ module;
 #include <GLFW/glfw3.h>
 #include <bgfx/bgfx.h>
 #include <entt/entt.hpp>
-#include <glm/glm.hpp>
-#include <glm/gtc/type_ptr.hpp> // Add this include for glm::value_ptr
 
 export module Misaka.Core.GameModule.GameRenderSystem;
 
+import glm;
 import Misaka.Core.GameModule.Interface.IRenderSystem;
 import Misaka.Core.Component.RenderComponent;
 import Misaka.Core.Renderer.Renderer;

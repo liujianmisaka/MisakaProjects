@@ -1,11 +1,11 @@
 module;
 
 #include <bgfx/bgfx.h>
-#include <glm/glm.hpp>
 
 export module Misaka.Core.Context.Context;
 
 import <string>;
+import glm;
 import Misaka.Core.Context.IContext;
 import Misaka.Core.Utils.Singleton;
 

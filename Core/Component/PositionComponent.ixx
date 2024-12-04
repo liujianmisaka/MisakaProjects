@@ -1,9 +1,6 @@
-module;
-
-#include <glm/glm.hpp>
-
 export module Misaka.Core.Component.PositionComponent;
 
+import glm;
 import Misaka.Core.Component.IComponent;
 
 namespace Misaka::Core::Component {

@@ -1,14 +1,12 @@
 module;
 
-#include <glm/glm.hpp>
-#include <glm/ext/matrix_transform.hpp>
-#include <glm/ext/matrix_clip_space.hpp>
 #include <GLFW/glfw3.h>
 
 export module Misaka.Core.CoreConfig;
 
 import <filesystem>;
 import <string>;
+import glm;
 
 export namespace Misaka::Core::CoreConfig {
 

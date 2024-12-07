@@ -106,7 +106,7 @@ bool ImGui_Implbgfx_CreateFontsTexture() {
                                           bgfx::copy(pixels, width * height * 4));
 
     // Store our identifier
-    io.Fonts->TexID = (intptr_t)g_FontTexture.idx;
+    io.Fonts->TexID = (ImTextureID)(intptr_t)g_FontTexture.idx;
 
     return true;
 }

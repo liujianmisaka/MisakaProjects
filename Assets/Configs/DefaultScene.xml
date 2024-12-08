@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+    <Items>
+        <Item>
+            <Id>1</Id>
+            <Meshs>
+                <SubMesh>cube</SubMesh>
+                <SubMesh>cube-BL</SubMesh>
+            </Meshs>
+            <PostionOffset>
+                <X>0</X>
+                <Y>0</Y>
+                <Z>0</Z>
+            </PostionOffset>
+        </Item>
+    </Items>
+</root>

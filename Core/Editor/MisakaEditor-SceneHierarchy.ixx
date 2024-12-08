@@ -42,7 +42,6 @@ public:
         ImGui::End();
     }
 
-private:
     static void DrawEntityNode(Entity::MisakaEntity entity) {
         const auto& tag = entity.GetComponent<Component::TagComponent>().Tag;
 

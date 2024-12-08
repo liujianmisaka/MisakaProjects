@@ -6,6 +6,7 @@ export module Misaka.Core.Editor.MisakaEditor:Tools;
 
 import glm;
 import Misaka.Core.CoreConfig;
+import :SceneHierarchy;
 
 namespace Misaka::Core::Editor {
 
@@ -17,8 +18,14 @@ public:
         // Set MVP Matrix
         auto fov = glm::degrees(CoreConfig::fov);
         ImGui::DragFloat("FOV", &fov, 0.1f, 0.0f, 180.0f);
-        CoreConfig::fov        = glm::radians(fov);
-        CoreConfig::projection = glm::perspective(CoreConfig::fov, CoreConfig::aspectRatio, CoreConfig::nearPlane, CoreConfig::farPlane);
+        CoreConfig::fov = glm::radians(fov);
+
+        auto cameraPos = CoreConfig::cameraPos;
+        SceneHierarchy::DrawVec3Control("cameraPos", cameraPos, 0.1f);
+        CoreConfig::cameraPos = cameraPos;
+
+        CoreConfig::view       = glm::lookAt(CoreConfig::cameraPos, CoreConfig::cameraTarget, CoreConfig::upDirection);
+        CoreConfig::perspectiveProjection = glm::perspective(CoreConfig::fov, CoreConfig::aspectRatio, CoreConfig::nearPlane, CoreConfig::farPlane);
 
         ImGui::End();
     }

@@ -31,7 +31,7 @@ public:
         float  viewportAspectRatio = viewportPanelSize.x / viewportPanelSize.y;
 
         CoreConfig::aspectRatio = viewportAspectRatio;
-        CoreConfig::projection  = glm::perspective(CoreConfig::fov, CoreConfig::aspectRatio, CoreConfig::nearPlane, CoreConfig::farPlane);
+        CoreConfig::perspectiveProjection  = glm::perspective(CoreConfig::fov, CoreConfig::aspectRatio, CoreConfig::nearPlane, CoreConfig::farPlane);
 
         ImTextureID textureID = (ImTextureID)viewportFrameBuffer->GetTextureIndex();
         ImGui::Image(textureID, viewportPanelSize, ImVec2{0, 1}, ImVec2{1, 0});

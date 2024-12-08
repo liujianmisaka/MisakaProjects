@@ -105,6 +105,7 @@ project "Core"
             "polyclipping",
             "pugixml",
             "squishd",
+            "tinyxml2",
             "zlibd",
         }
 

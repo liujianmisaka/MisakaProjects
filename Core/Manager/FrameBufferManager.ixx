@@ -15,7 +15,7 @@ export enum class FrameBufferType {
 export class FrameBufferManager {
 public:
     void Init() {
-        CreateFrameBuffer(FrameBufferType::VIEWPORT, 900, 900, 2);
+        CreateFrameBuffer(FrameBufferType::VIEWPORT, 1600, 900, 2);
     }
 
     std::shared_ptr<Renderer::FrameBuffer> CreateFrameBuffer(FrameBufferType type, uint16_t width, uint16_t height, uint8_t viewId) {

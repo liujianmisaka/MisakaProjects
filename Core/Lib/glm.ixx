@@ -6,6 +6,8 @@ module;
 
 #include <glm/glm.hpp>
 #include <glm/ext.hpp>
+#define GLM_ENABLE_EXPERIMENTAL
+#include <glm/gtx/quaternion.hpp>
 
 export module glm;
 
@@ -28,9 +30,15 @@ using glm::radians;
 
 using glm::lookAt;
 using glm::perspective;
+using glm::ortho;
 using glm::project;
 
 using glm::value_ptr;
+
+using glm::toMat4;
+using glm::quat;
+
+using glm::inverse;
 
 // Operators
 using glm::operator+;

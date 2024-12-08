@@ -36,7 +36,7 @@ public:
             auto& transformComponent = registry->get<Component::TransformComponent>(entity);
 
             auto u_mvp = SingletonManager::GetInstance<Manager::UniformBufferManager>()->GetUniformBuffer("u_mvp");
-            u_mvp->SetData(glm::value_ptr(CoreConfig::projection * CoreConfig::view * transformComponent.GetModelMatrix()));
+            u_mvp->SetData(glm::value_ptr(CoreConfig::perspectiveProjection * CoreConfig::view * transformComponent.GetModelMatrix()));
 
             auto s_tex   = SingletonManager::GetInstance<Manager::UniformBufferManager>()->GetUniformBuffer("s_tex");
             auto texture = SingletonManager::GetInstance<Manager::TextureManager>()->GetTexture("docker.png");

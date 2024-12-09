@@ -5,13 +5,12 @@
             <Id>1</Id>
             <Meshs>
                 <SubMesh>cube</SubMesh>
-                <SubMesh>cube-BL</SubMesh>
             </Meshs>
-            <PostionOffset>
+            <PositionOffset>
                 <X>0</X>
                 <Y>0</Y>
                 <Z>0</Z>
-            </PostionOffset>
+            </PositionOffset>
         </Item>
     </Items>
 </root>

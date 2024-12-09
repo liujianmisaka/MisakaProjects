@@ -2,29 +2,27 @@ export module Misaka.Core.XMLConfig.DefaultSceneConfigManager;
 
 import <vector>;
 import <memory>;
+import <string>;
 import <unordered_map>;
 import Misaka.Core.XMLConfig.IXMLConfigManager;
 import Misaka.Core.XMLConfig.DefaultSceneConfigItem;
+import Misaka.Core.CoreConfig;
 
 namespace Misaka::Core::XMLConfig {
 
 export class DefaultSceneConfigManager : public IXMLConfigManager {
 public:
     virtual void Parse() override {
-        auto configItems = ParseConfigFile("DefaultSceneConfig.xml");
-        for (auto item : configItems) {
-            auto configItem = std::make_shared<DefaultSceneConfigItem>();
-            configItem->Parse(item);
-            m_ConfigItems[configItem->Id] = configItem;
-        }
+        ParseConfigFile<DefaultSceneConfigItem>(m_FileName);
     }
 
     std::shared_ptr<DefaultSceneConfigItem> GetItem(int id) {
-        return m_ConfigItems[id];
+        auto it = m_ConfigItems.find(id);
+        if (it != m_ConfigItems.end()) {
+            return std::dynamic_pointer_cast<DefaultSceneConfigItem>(it->second);
+        }
+        return nullptr;
     }
-
-private:
-    std::unordered_map<int, std::shared_ptr<DefaultSceneConfigItem>> m_ConfigItems;
 };
 
 } // namespace Misaka::Core::XMLConfig

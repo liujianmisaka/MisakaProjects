@@ -12,11 +12,14 @@ import Misaka.Core.GameModule.GameModule;
 import Misaka.Core.GameModule.RenderInitSystem;
 import Misaka.Core.GameModule.EditorInitSystem;
 import Misaka.Core.GameModule.ManagerInitSystem;
+import Misaka.Core.GameModule.XMLConfigInitSystem;
 import Misaka.Core.GameModule.AssetUpLoadSystem;
 import Misaka.Core.GameModule.GameRenderSystem;
 import Misaka.Core.GameModule.WindowRenderSystem;
 import Misaka.Core.GameRoom.GameRoom;
 import Misaka.Core.Component.MeshComponent;
+import Misaka.Core.XMLConfig.DefaultSceneConfigManager;
+import Misaka.Core.XMLConfig.DefaultSceneConfigItem;
 
 namespace Misaka::Core {
 
@@ -37,6 +40,7 @@ protected:
         gameModule->AddSystem<GameModule::RenderInitSystem>();
         gameModule->AddSystem<GameModule::EditorInitSystem>();
         gameModule->AddSystem<GameModule::ManagerInitSystem>();
+        gameModule->AddSystem<GameModule::XMLConfigInitSystem>();
         gameModule->AddSystem<GameModule::AssetUpLoadSystem>();
         gameModule->AddSystem<GameModule::GameRenderSystem>();
         gameModule->AddSystem<GameModule::WindowRenderSystem>();
@@ -44,9 +48,10 @@ protected:
 
         auto gameRoom = SingletonManager::GetInstance<GameRoom>();
 
-        auto  entity        = gameRoom->AddEntity("cube");
-        auto& meshComponent = entity.AddComponent<Component::MeshComponent>();
-        meshComponent.meshes.push_back("cube");
+        auto defaultScene = SingletonManager::GetInstance<XMLConfig::DefaultSceneConfigManager>()->GetItem(1);
+
+        auto entity = gameRoom->AddEntity(defaultScene->Meshs[0]);
+        entity.AddComponent<Component::MeshComponent>().meshes.push_back(defaultScene->Meshs[0]);
     }
 
     void Loop() {

@@ -7,7 +7,9 @@ export module Misaka.Core.XMLConfig.IXMLConfigManager;
 import <string>;
 import <vector>;
 import <iostream>;
+import <unordered_map>;
 import Misaka.Core.CoreConfig;
+import Misaka.Core.XMLConfig.IXMLConfigItem;
 
 namespace Misaka::Core::XMLConfig {
 
@@ -15,34 +17,56 @@ export class IXMLConfigManager {
 public:
     virtual void Parse() = 0;
 
-protected:
-    virtual std::vector<tinyxml2::XMLElement*> ParseConfigFile(const std::string& fileName) {
-        std::string filePath = (CoreConfig::Configs / fileName).string();
+    virtual void SetFileName(const std::string& name) {
+        m_FileName = name;
+    }
 
-        std::vector<tinyxml2::XMLElement*> configItems;
+protected:
+    template <typename Item>
+    void ParseConfigFile(const std::string& fileName) {
+        std::string filePath = (CoreConfig::Configs / fileName).string();
 
         tinyxml2::XMLDocument doc;
         if (doc.LoadFile(filePath.c_str()) != tinyxml2::XML_SUCCESS) {
             std::cerr << "Failed to load file: " << filePath << std::endl;
-            return configItems;
+            return;
         }
 
         const tinyxml2::XMLElement* root = doc.RootElement();
         if (root == nullptr) {
             std::cerr << "Failed to get root element." << std::endl;
-            return configItems;
+            return;
         }
 
         const tinyxml2::XMLElement* itemsElement = root->FirstChildElement("Items");
-        if (itemsElement) {
-            for (const tinyxml2::XMLElement* itemElement = itemsElement->FirstChildElement("Item"); itemElement != nullptr;
-                 itemElement                             = itemElement->NextSiblingElement("Item")) {
-                configItems.push_back(const_cast<tinyxml2::XMLElement*>(itemElement));
-            }
+        if (itemsElement == nullptr) {
+            std::cerr << "Failed to find 'Items' element." << std::endl;
+            return;
         }
 
-        return configItems;
+        std::vector<const tinyxml2::XMLElement*> itemElements;
+
+        for (const tinyxml2::XMLElement* itemElement = itemsElement->FirstChildElement("Item"); itemElement != nullptr;
+             itemElement                             = itemElement->NextSiblingElement("Item")) {
+            itemElements.push_back(itemElement);
+        }
+
+        if (itemElements.empty()) {
+            std::cerr << "No 'Item' elements found in 'Items' element." << std::endl;
+        }
+
+        for (auto item : itemElements) {
+            auto configItem = std::make_shared<Item>();
+            configItem->Parse(item);
+            m_ConfigItems[configItem->Id] = configItem;
+        }
+
+        return;
     }
+
+    std::string m_FileName;
+
+    std::unordered_map<int, std::shared_ptr<IXMLConfigItem>> m_ConfigItems;
 };
 
 } // namespace Misaka::Core::XMLConfig

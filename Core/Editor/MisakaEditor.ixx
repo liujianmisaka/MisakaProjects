@@ -49,7 +49,7 @@ public:
         io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;
         io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
 
-        io.FontGlobalScale = 1.5f;
+        io.FontGlobalScale = 1.0f;
 
         ImGui::StyleColorsDark();
 

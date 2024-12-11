@@ -30,6 +30,114 @@ project "Assets"
         "%{prj.location}/**.sc"
     }
 
+-- BehaviorTree Project
+project "BehaviorTree"
+    location "BehaviorTree"
+    kind "StaticLib"
+    language "C++"
+    cppdialect "C++latest"
+    staticruntime "on"
+    enablemodules("on")
+    buildstlmodules("off")
+    scanformoduledependencies "true"
+
+    buildoptions { "/utf-8", "/Zc:__cplusplus", "/Zc:preprocessor" }  -- 使用 UTF-8 编码
+
+    targetdir ("bin/" .. outputdir .. "/Sandbox")
+    objdir ("bin-int/" .. outputdir .. "/Sandbox")
+
+    files
+    {
+        -- Automatically include all .hpp(.h) and .cpp files in each module folder
+        "%{prj.location}/**.hpp",
+        "%{prj.location}/**.h",
+        "%{prj.location}/**.cpp",
+        "%{prj.location}/**.ixx"
+    }
+
+    includedirs
+    {
+        -- Add the vcpkg include path
+        "%{wks.location}/Core",  -- Include the Core project modules
+        VCPKG_INCLUDE,
+    }
+
+    filter "system:windows"
+        systemversion "latest"
+        defines 
+        { 
+            "BEHAVIORTREE_PLATFORM_WINDOWS",
+            "BX_CONFIG_DEBUG"
+        }
+
+    filter "configurations:Debug"
+        defines "BEHAVIORTREE_DEBUG"
+        runtime "Debug"
+        symbols "on"
+
+        -- buildoptions { "/Z7" }
+
+        libdirs 
+        {
+            -- Add the vcpkg library path
+            VCPKG_DEBUG_LIB
+        }
+
+        links
+        {
+            "assimp-vc143-mtd",
+            "bgfx",
+            "bimg",
+            "bimg_decode",
+            "bimg_encode",
+            "bx",
+            "draco",
+            "glad",
+            "glfw3",
+            "glm",
+            "imguid",
+            "kubazip",
+            "minizip",
+            "poly2tri",
+            "polyclipping",
+            "pugixml",
+            "squishd",
+            "tinyxml2",
+            "zlibd",
+        }
+
+    filter "configurations:Release"
+        defines "BEHAVIORTREE_RELEASE"
+        runtime "Release"
+        optimize "on"
+
+        libdirs 
+        {
+            -- Add the vcpkg library path
+            VCPKG_LIB
+        }
+
+        links
+        {
+            "assimp-vc143-mt",
+            "bgfx",
+            "bimg",
+            "bimg_decode",
+            "bimg_encode",
+            "bx",
+            "draco",
+            "glad",
+            "glfw3",
+            "glm",
+            "imgui",
+            "kubazip",
+            "minizip",
+            "poly2tri",
+            "polyclipping",
+            "pugixml",
+            "squish",
+            "zlib",
+        }
 
 -- Core Project
 project "Core"
@@ -88,25 +196,8 @@ project "Core"
 
         links
         {
-            "assimp-vc143-mtd",
-            "bgfx",
-            "bimg",
-            "bimg_decode",
-            "bimg_encode",
-            "bx",
-            "draco",
-            "glad",
-            "glfw3",
             "glm",
             "imguid",
-            "kubazip",
-            "minizip",
-            "poly2tri",
-            "polyclipping",
-            "pugixml",
-            "squishd",
-            "tinyxml2",
-            "zlibd",
         }
 
     filter "configurations:Release"
@@ -122,24 +213,8 @@ project "Core"
 
         links
         {
-            "assimp-vc143-mt",
-            "bgfx",
-            "bimg",
-            "bimg_decode",
-            "bimg_encode",
-            "bx",
-            "draco",
-            "glad",
-            "glfw3",
             "glm",
             "imgui",
-            "kubazip",
-            "minizip",
-            "poly2tri",
-            "polyclipping",
-            "pugixml",
-            "squish",
-            "zlib",
         }
 
 -- Sandbox Project
@@ -170,13 +245,15 @@ project "Sandbox"
     
     includedirs
     {
-        "%{wks.location}/Core",  -- Include the Core project modules
-        VCPKG_INCLUDE  -- Include vcpkg dependencies
+        "%{wks.location}/BehaviorTree",  -- Include the BehaviorTree project modules
+        "%{wks.location}/Core",           -- Include the Core project modules
+        VCPKG_INCLUDE,                    -- Include vcpkg dependencies
     }
 
     links
     {
-        "Core"   -- Link with Core library
+        "BehaviorTree",  -- Link with BehaviorTree library
+        "Core",           -- Link with Core library
     }
 
     filter "system:windows"

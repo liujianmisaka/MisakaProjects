@@ -18,6 +18,7 @@ import :Toolbar;
 import :SceneHierarchy;
 import :Tools;
 import :Viewport;
+import :BTTreePanel;
 
 import <iostream>;
 import Misaka.Core.SingletonManager;
@@ -123,6 +124,7 @@ public:
         SceneHierarchy::Render();
         Tools::Render();
         Viewport::Render();
+        BTTreePanel::Render();
 
         ImGui::End();
     }

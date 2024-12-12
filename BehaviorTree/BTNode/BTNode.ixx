@@ -1,5 +1,8 @@
 export module Misaka.BehaviorTree.BTNode;
 
+import <string>;
+import glm;
+
 namespace Misaka::BehaviorTree {
 
 export enum class BTSTATUS {
@@ -17,10 +20,6 @@ public:
     virtual void OnBTNodeStart() = 0;
     virtual void OnBTNodeRun()   = 0;
     virtual void OnBTNodeEnd()   = 0;
-
-    virtual void OnBTNodeDebug() = 0;
-
-    virtual void OnBTNodeRender() = 0;
 };
 
 } // namespace Misaka::BehaviorTree

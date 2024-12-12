@@ -30,6 +30,79 @@ project "Assets"
         "%{prj.location}/**.sc"
     }
 
+-- Library Project
+project "Library"
+    location "Library"
+    kind "StaticLib"
+    language "C++"
+    cppdialect "C++latest"
+    staticruntime "on"
+    enablemodules("on")
+    buildstlmodules("off")
+    scanformoduledependencies "true"
+
+    buildoptions { "/utf-8", "/Zc:__cplusplus", "/Zc:preprocessor" }  -- 使用 UTF-8 编码
+
+    targetdir ("bin/" .. outputdir .. "/Sandbox")
+    objdir ("bin-int/" .. outputdir .. "/Sandbox")
+
+    files
+    {
+        -- Automatically include all .hpp(.h) and .cpp files in each module folder
+        "%{prj.location}/**.hpp",
+        "%{prj.location}/**.h",
+        "%{prj.location}/**.cpp",
+        "%{prj.location}/**.ixx"
+    }
+
+    includedirs
+    {
+        -- Add the vcpkg include path
+        VCPKG_INCLUDE,
+    }
+
+    filter "system:windows"
+        systemversion "latest"
+        defines 
+        { 
+            "LIBRARY_PLATFORM_WINDOWS",
+            "BX_CONFIG_DEBUG"
+        }
+
+    filter "configurations:Debug"
+        defines "LIBRARY_DEBUG"
+        runtime "Debug"
+        symbols "on"
+
+        -- buildoptions { "/Z7" }
+
+        libdirs 
+        {
+            -- Add the vcpkg library path
+            VCPKG_DEBUG_LIB
+        }
+
+        links
+        {
+            "glm",
+        }
+
+    filter "configurations:Release"
+        defines "LIBRARY_RELEASE"
+        runtime "Release"
+        optimize "on"
+
+        libdirs 
+        {
+            -- Add the vcpkg library path
+            VCPKG_LIB
+        }
+
+        links
+        {
+            "glm",
+        }
+
 -- BehaviorTree Project
 project "BehaviorTree"
     location "BehaviorTree"
@@ -58,8 +131,12 @@ project "BehaviorTree"
     includedirs
     {
         -- Add the vcpkg include path
-        "%{wks.location}/Core",  -- Include the Core project modules
-        VCPKG_INCLUDE,
+        "%{wks.location}/Library",  -- Include the Library project modules
+    }
+
+    links
+    {
+        "Library",
     }
 
     filter "system:windows"
@@ -75,69 +152,10 @@ project "BehaviorTree"
         runtime "Debug"
         symbols "on"
 
-        -- buildoptions { "/Z7" }
-
-        libdirs 
-        {
-            -- Add the vcpkg library path
-            VCPKG_DEBUG_LIB
-        }
-
-        links
-        {
-            "assimp-vc143-mtd",
-            "bgfx",
-            "bimg",
-            "bimg_decode",
-            "bimg_encode",
-            "bx",
-            "draco",
-            "glad",
-            "glfw3",
-            "glm",
-            "imguid",
-            "kubazip",
-            "minizip",
-            "poly2tri",
-            "polyclipping",
-            "pugixml",
-            "squishd",
-            "tinyxml2",
-            "zlibd",
-        }
-
     filter "configurations:Release"
         defines "BEHAVIORTREE_RELEASE"
         runtime "Release"
         optimize "on"
-
-        libdirs 
-        {
-            -- Add the vcpkg library path
-            VCPKG_LIB
-        }
-
-        links
-        {
-            "assimp-vc143-mt",
-            "bgfx",
-            "bimg",
-            "bimg_decode",
-            "bimg_encode",
-            "bx",
-            "draco",
-            "glad",
-            "glfw3",
-            "glm",
-            "imgui",
-            "kubazip",
-            "minizip",
-            "poly2tri",
-            "polyclipping",
-            "pugixml",
-            "squish",
-            "zlib",
-        }
 
 -- Core Project
 project "Core"
@@ -168,9 +186,10 @@ project "Core"
     includedirs
     {
         -- Add the vcpkg include path
-        "%{wks.location}/Core",  -- Include the Core project modules
         VCPKG_INCLUDE,
-        VCPKG_INCLUDE .. "/bx/compat/msvc"
+        VCPKG_INCLUDE .. "/bx/compat/msvc",
+        "%{wks.location}/Library",  -- Include the Library project modules
+        "%{wks.location}/BehaviorTree",  -- Include the BehaviorTree project modules
     }
     
     filter "system:windows"
@@ -186,18 +205,35 @@ project "Core"
         runtime "Debug"
         symbols "on"
 
-        -- buildoptions { "/Z7" }
-
         libdirs 
         {
             -- Add the vcpkg library path
-            VCPKG_DEBUG_LIB
+            VCPKG_DEBUG_LIB,
         }
 
         links
         {
-            "glm",
+            "assimp-vc143-mtd",
+            "bgfx",
+            "bimg",
+            "bimg_decode",
+            "bimg_encode",
+            "bx",
+            "draco",
+            "glad",
+            "glfw3",
             "imguid",
+            "kubazip",
+            "minizip",
+            "poly2tri",
+            "polyclipping",
+            "pugixml",
+            "squishd",
+            "tinyxml2",
+            "zlibd",
+
+            "Library",
+            "BehaviorTree",
         }
 
     filter "configurations:Release"
@@ -213,8 +249,26 @@ project "Core"
 
         links
         {
-            "glm",
+            "assimp-vc143-mt",
+            "bgfx",
+            "bimg",
+            "bimg_decode",
+            "bimg_encode",
+            "bx",
+            "draco",
+            "glad",
+            "glfw3",
             "imgui",
+            "kubazip",
+            "minizip",
+            "poly2tri",
+            "polyclipping",
+            "pugixml",
+            "squish",
+            "zlib",
+
+            "Library",
+            "BehaviorTree",
         }
 
 -- Sandbox Project
@@ -274,105 +328,3 @@ project "Sandbox"
         defines "SANDBOX_RELEASE"
         runtime "Release"
         optimize "on"
-
--- Test Project
-project "Test"
-    location "Test"
-    kind "ConsoleApp"
-    language "C++"
-    cppdialect "C++latest"
-    staticruntime "on"
-    enablemodules("on")
-    buildstlmodules("on")
-    scanformoduledependencies "true"
-
-    buildoptions { "/utf-8", "/Zc:__cplusplus" }  -- 使用 UTF-8 编码
-    
-    targetdir ("bin/" .. outputdir .. "/%{prj.name}")
-    objdir ("bin-int/" .. outputdir .. "/%{prj.name}")
-
-    files
-    {
-        "%{prj.location}/**.hpp",
-        "%{prj.location}/**.h",
-        "%{prj.location}/**.cpp",
-        "%{prj.location}/**.ixx"
-    }
-    
-    includedirs
-    {
-        VCPKG_INCLUDE  -- Include vcpkg dependencies
-    }
-
-    filter "system:windows"
-        systemversion "latest"
-        defines 
-        { 
-            "Test_PLATFORM_WINDOWS"
-        }
-
-    filter "configurations:Debug"
-        defines "Test_DEBUG"
-        runtime "Debug"
-        symbols "on"
-
-        libdirs 
-        {
-            -- Add the vcpkg library path
-            VCPKG_DEBUG_LIB
-        }
-
-        links
-        {
-            "assimp-vc143-mtd",
-            "bgfx",
-            "bimg",
-            "bimg_decode",
-            "bimg_encode",
-            "bx",
-            "draco",
-            "glad",
-            "glfw3",
-            "glm",
-            "imguid",
-            "kubazip",
-            "minizip",
-            "poly2tri",
-            "polyclipping",
-            "pugixml",
-            "squishd",
-            "zlibd",
-        }
-
-    filter "configurations:Release"
-        defines "Test_RELEASE"
-        runtime "Release"
-        optimize "on"
-
-        libdirs 
-        {
-            -- Add the vcpkg library path
-            VCPKG_LIB
-        }
-
-        links
-        {
-            "assimp-vc143-mt",
-            "bgfx",
-            "bimg",
-            "bimg_decode",
-            "bimg_encode",
-            "bx",
-            "draco",
-            "glad",
-            "glfw3",
-            "glm",
-            "imgui",
-            "kubazip",
-            "minizip",
-            "poly2tri",
-            "polyclipping",
-            "pugixml",
-            "squish",
-            "zlib",
-        }
